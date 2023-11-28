@@ -1,8 +1,4 @@
 from pathlib import Path
 
 TEST_DATA_DIR = Path(__file__).parent / "data"
-
-
-def get_game_lines() -> str:
-    file = TEST_DATA_DIR / "game_lines.txt"
-    return file.read_text()
+WAS_2022_TWO_GAME_EXAMPLE = TEST_DATA_DIR / "2022WAS.EVN"
