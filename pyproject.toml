@@ -18,6 +18,7 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "requests>=2.31.0,<3",
 ]
 
 [project.optional-dependencies]
@@ -28,6 +29,9 @@ dev = [
   "isort==5.12.0",
   "mypy==1.7.1",
   "ruff==0.1.6",
+  "types-requests=>2.31.0,<3",
+  "requests-mock==1.11.0",
+  "pytest-mock==3.12.0",
 ]
 
 [project.urls]
@@ -57,6 +61,7 @@ ignore = [
 ]
 line-length = 120
 target-version = "py311"
+pydocstyle.convention = "google"
 
 [tool.black]
 line-length = 120
