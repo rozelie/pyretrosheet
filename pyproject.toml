@@ -1,0 +1,113 @@
+[build-system]
+requires = ["flit_core>=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "pyretrosheet"
+version = "0.0.1"
+description = "Load and analyze retrosheet.org MLB data."
+authors = [
+  { name = "Ryan Ozelie", email = "ryan.ozelie@gmail.com" },
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.11"
+dependencies = [
+]
+
+[project.optional-dependencies]
+# up-to-date dependencies as of 11/28/2023
+dev = [
+  "pytest==7.4.3",
+  "black==23.11.0",
+  "isort==5.12.0",
+  "mypy==1.7.1",
+  "ruff==0.1.6",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/rozelie/pyretrosheet"
+
+[tool.ruff]
+# Rules: https://docs.astral.sh/ruff/rules/
+select = [
+    "D", # pydocstyle
+    "I", # isort
+    "UP", # pyupgrade
+    "C4", # flake8-comprehensions
+    "ISC", # flake8-implicit-str-concat
+    "T20", # flake8-print
+    "PT", # flake8-pytest-style
+    "SIM", # flake8-simplify
+    "PTH", # flake8-use-pathlib
+    "ERA", # eradicate
+    "PL", # Pylint
+    "TRY", # tryceratops
+    "RUF", # Ruff-specific rules
+]
+ignore = [
+    "D107", # Missing docstring in `__init__`
+    "D203", # one-blank-line-before-class
+    "D213", # multi-line-summary-second-line
+]
+line-length = 120
+target-version = "py311"
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+color = true
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | env
+    | venv
+)/
+'''
+
+[tool.isort]
+line_length = 120
+py_version = 311
+include_trailing_comma = true
+profile = "black"
+indent = 4
+color_output = true
+
+[tool.mypy]
+python_version = 3.11
+pretty = true
+show_traceback = true
+color_output = true
+
+allow_redefinition = false
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+ignore_missing_imports = true
+implicit_reexport = false
+no_implicit_optional = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+strict_equality = true
+strict_optional = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+disable_error_code = "attr-defined"
