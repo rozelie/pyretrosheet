@@ -85,3 +85,5 @@ def _yield_years_play_by_play_files(data_dir: Path, year: int) -> Iterator[Path]
     """
     yield from data_dir.glob(f"{year}*.EVN")  # National League data files
     yield from data_dir.glob(f"{year}*.EVA")  # American League data files
+    yield from data_dir.glob(f"{year}*.EVF")  # Federal League data files
+    yield from data_dir.glob(f"{year}*.EVR")  # Negro League data files
