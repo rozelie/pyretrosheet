@@ -1,9 +1,22 @@
 """Encapsulates Retrosheet game data."""
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 
 from pyretrosheet.models.game_id import GameID
 from pyretrosheet.models.play import Play
 from pyretrosheet.models.player import Player
+
+
+class GameIDNotFoundError(Exception):
+    """Error when unable to find a game's id."""
+
+    def __init__(self, first_game_line: str):
+        """Initialize the exception.
+
+        Args:
+            first_game_line: the first line of game lines
+        """
+        super().__init__(f"Unable to find game id for game: {first_game_line=}")
 
 
 @dataclass
@@ -13,32 +26,77 @@ class Game:
     Args:
         game_id: the game id
         info: miscellaneous encoded information like temperature, attendance, umpire names, etc.
-        home_team_id: the Retrosheet team id of the home team
-        visiting_team_id: the Retrosheet team id of the visiting team
-        home_team_players: the players on the home team
-        home_team_starting_lineup: the players of starting lineup on the home team
-        visiting_team_players: the players on the visiting team
-        visiting_team_starting_lineup: the players of starting lineup on the visiting team
-        plays: the plays that occurred over the course of the game
-        player_id_to_earned_runs: mapping of player id to earned runs
+        chronological_events: the chronological order of events occurring
+        earned_runs: map of player id to earned runs
     """
 
     game_id: GameID
     info: dict[str, str]
-    home_team_id: str
-    visiting_team_id: str
-    home_team_players: list[Player]
-    home_team_starting_lineup: list[Player]
-    visiting_team_players: list[Player]
-    visiting_team_starting_lineup: list[Player]
-    plays: list[Play]
-    player_id_to_earned_runs: dict[str, int]
+    chronological_events: Sequence[Player | Play]
+    earned_runs: dict[str, int]
 
     @classmethod
-    def from_retrosheet_game_lines(cls, game_lines: list[str]) -> "Game":
-        """Load a game from Retrosheet game lines.
+    def from_game_lines(cls, game_lines: list[str]) -> "Game":
+        """Load a game from game lines.
 
         Args:
-            game_lines: game lines from a Retrosheet game
+            game_lines: game lines from a game
         """
-        raise NotImplementedError()
+        game_id = None
+        info = {}
+        chronological_events: Sequence[Player | Play] = []
+        earned_runs = {}
+        for i, line in enumerate(game_lines):
+            parts = line.split(",")
+            match parts[0]:
+                case "id":
+                    game_id = GameID.from_id_line(line)
+
+                case "info":
+                    info[parts[1]] = parts[2]
+
+                case "start":
+                    chronological_events.append(Player.from_start_or_sub_line(line, is_sub=False))
+
+                case "sub":
+                    chronological_events.append(Player.from_start_or_sub_line(line, is_sub=True))
+
+                case "play":
+                    comment_lines = list(_yield_comment_lines_following_play(i, game_lines))
+                    chronological_events.append(Play.from_play_line(line, comment_lines))
+
+                case "data":
+                    earned_runs[parts[2]] = int(parts[3])
+
+        if not game_id:
+            raise GameIDNotFoundError(game_lines[0])
+
+        return cls(
+            game_id=game_id,
+            info=info,
+            chronological_events=chronological_events,
+            earned_runs=earned_runs,
+        )
+
+    @property
+    def home_team_id(self) -> str:
+        """The id of the home team."""
+        return self.info["hometeam"]
+
+    @property
+    def visiting_team_id(self) -> str:
+        """The id of the visiting team."""
+        return self.info["visteam"]
+
+
+def _yield_comment_lines_following_play(play_line_number: int, game_lines: list[str]) -> Iterator[str]:
+    """Yield all comment lines that follow a play line."""
+    line_pointer = 1
+    while True:
+        line = game_lines[play_line_number + line_pointer]
+        parts = line.split(",")
+        if parts[0] == "com":
+            yield line
+            line_pointer += 1
+        else:
+            break

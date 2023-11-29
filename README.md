@@ -20,5 +20,8 @@ publish_to_testpypi:  Publish the package to test.pypi.org.
 publish_to_pypi:  Publish the package to pypi.org.
 ```
 
+## TODO
+- Parse out 'info' fields into `Game` properties
+
 # Credits
 - Project skeleton generated via `cookiecutter https://github.com/rozelie/Python-Project-Cookiecutter`

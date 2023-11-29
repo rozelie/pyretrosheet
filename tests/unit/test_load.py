@@ -6,7 +6,6 @@ from tests import testing_data
 MODULE_PATH = "pyretrosheet.load"
 
 
-@pytest.mark.skip(reason="Game loading not yet implemented")
 def test_yield_games_in_year(mocker):
     retrosheet_client = mocker.Mock()
     year = 2022
@@ -18,6 +17,9 @@ def test_yield_games_in_year(mocker):
             year=year,
         )
     )
+
+    # the amount of games encoded in data files in the tests.data dir
+    assert len(games_in_year) == 3
 
 
 def test__yield_game_lines():

@@ -22,7 +22,7 @@ def yield_games_in_year(retrosheet_client: RetrosheetClient, data_dir: Path, yea
         data_dir=data_dir,
     ):
         for games_lines in _yield_game_lines(file.read_text().splitlines()):
-            yield Game.from_retrosheet_game_lines(games_lines)
+            yield Game.from_game_lines(games_lines)
 
 
 def _yield_game_lines(lines: list[str]) -> Iterator[list[str]]:

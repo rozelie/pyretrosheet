@@ -13,10 +13,10 @@ class GameID:
         - first game of the day
 
     Args:
-        home_team_id: the home team's Retrosheet ID
+        home_team_id: the home team's id
         date: the date the game was played
         game_number: the number of the game happening on the date (single game (0), first game (1) or second game (2))
-        raw: the raw value of the Retrosheet game ID
+        raw: the raw value of the game id
     """
 
     home_team_id: str
@@ -25,11 +25,11 @@ class GameID:
     raw: str
 
     @classmethod
-    def from_retrosheet_id_line(cls, id_line: str) -> "GameID":
-        """Load the GameID from a Retrosheet 'id' line.
+    def from_id_line(cls, id_line: str) -> "GameID":
+        """Load the GameID from a 'id' line.
 
         Args:
-            id_line: the Retrosheet 'id' line
+            id_line: the 'id' line
         """
         id_value = id_line.split(",")[1]
         raw_date = "".join([c for c in id_value if c.isnumeric()][:-1])
