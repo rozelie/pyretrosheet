@@ -37,7 +37,7 @@ class Player:
         _, player_id, name, team_location, batting_order_position, fielding_position = start_or_sub_line.split(",")
         return cls(
             id=player_id,
-            name=name,
+            name=name.replace('"', ""),
             team_location=TeamLocation(int(team_location)),
             batting_order_position=int(batting_order_position),
             fielding_position=int(fielding_position),
