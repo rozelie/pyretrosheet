@@ -1,5 +1,3 @@
-import pytest
-
 from pyretrosheet import load
 from tests import testing_data
 
