@@ -71,6 +71,7 @@ def test__get_modifier_type(raw_modifier, expected_modifier_type):
         ("TH1", ModifierType.THROW, None),
         ("TH12", ModifierType.THROW, "2"),
         ("89", ModifierType.HIT_LOCATION, "89"),
+        ("7L", ModifierType.HIT_LOCATION, "7L"),
     ],
 )
 def test__get_hit_location(raw_modifier, modifier_type, expected_hit_location):

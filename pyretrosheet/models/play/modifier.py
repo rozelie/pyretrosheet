@@ -143,7 +143,7 @@ def _get_modifier_type(modifier: str) -> ModifierType:
         r"TP(\d+.*)?": ModifierType.UNSPECIFIED_TRIPLE_PLAY,
         r"UINT(\d+.*)?": ModifierType.UMPIRE_INTERFERENCE,
         r"UREV(\d+.*)?": ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD,
-        r"\d+": ModifierType.HIT_LOCATION,
+        r"\d+.*": ModifierType.HIT_LOCATION,
     }
     for pattern, modifier_type in pattern_to_modifier_type.items():
         if re.fullmatch(pattern, modifier):
