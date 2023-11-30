@@ -2,9 +2,13 @@
 from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 
+from pyretrosheet.models.exceptions import ParseError
 from pyretrosheet.models.game_id import GameID
 from pyretrosheet.models.play import Play
 from pyretrosheet.models.player import Player
+
+ChronologicalEvent = Player | Play
+ChronologicalEvents = Sequence[ChronologicalEvent]
 
 
 class GameIDNotFoundError(Exception):
@@ -32,7 +36,7 @@ class Game:
 
     game_id: GameID
     info: dict[str, str]
-    chronological_events: Sequence[Player | Play]
+    chronological_events: ChronologicalEvents
     earned_runs: dict[str, int]
 
     @classmethod
@@ -44,7 +48,7 @@ class Game:
         """
         game_id = None
         info = {}
-        chronological_events: Sequence[Player | Play] = []
+        chronological_events: ChronologicalEvents = []
         earned_runs = {}
         for i, line in enumerate(game_lines):
             parts = line.split(",")
