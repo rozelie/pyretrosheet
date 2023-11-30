@@ -30,26 +30,27 @@ Contributions are welcome for any encodings not covered!
 - Record types
   - `id`
   - `info`
-  - `start` and `sub`
+  - `start`
+  - `sub`
   - `play`
-    - advances
-    - outs
   - `data`
   - `com`
 
-### Not Covered, But Plan On Implementing
-- Record types
-  - `radj`
-  - `play`'s pitching encoding
-  - `play`'s basic play description
-  - `play`'s modifiers
-
 ### Not Covered
 - Record types
+  - `play`'s pitching encoding
+  - `radj`
   - `badj`
   - `padj`
   - `ladj`
   - `presadj`
+
+- Miscellaneous data
+  - replays
+  - ejections
+  - umpire changes
+  - protests
+  - suspensions
 
 ## Enriched
 Retrosheet does not provide player-level nor aggregate statistics.
@@ -64,6 +65,7 @@ help: Show this help.
 setup: Install the package and dev dependencies into a virtualenv.
 run:  Run the package.
 test:  Run pytest on the tests dir.
+test_all_data: Run pytest on all Retrosheet data.
 format: Run black and isort on package and tests dirs.
 lint:  Run ruff and mypy on package files.
 docker_build: Build a Docker image for the package.

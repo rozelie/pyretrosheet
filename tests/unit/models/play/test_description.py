@@ -157,10 +157,13 @@ def test__get_put_out_at_base(raw_description, batter_event, expected_put_out_at
     assert description._get_put_out_at_base(raw_description, batter_event) == expected_put_out_at_base
 
 
-def test__get_stolen_base():
-    raw_description = "SB2"
-    runner_event = RunnerEvent.STOLEN_BASE
-
-    stolen_base = description._get_stolen_base(raw_description, runner_event)
-
-    assert stolen_base == Base.SECOND_BASE
+@pytest.mark.parametrize(
+    ["raw_description", "runner_event", "expected_stolen_base"],
+    [
+        ("K", None, None),
+        ("SB2", RunnerEvent.STOLEN_BASE, Base.SECOND_BASE),
+        ("K+SB2", RunnerEvent.STOLEN_BASE, Base.SECOND_BASE),
+    ],
+)
+def test__get_stolen_base(raw_description, runner_event, expected_stolen_base):
+    assert description._get_stolen_base(raw_description, runner_event) == expected_stolen_base

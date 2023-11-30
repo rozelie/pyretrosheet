@@ -350,6 +350,6 @@ def _get_put_out_at_base(description: str, batter_event: BatterEvent | None) -> 
 
 def _get_stolen_base(description: str, runner_event: RunnerEvent | None) -> Base | None:
     if runner_event == RunnerEvent.STOLEN_BASE:
-        return Base(re.fullmatch(r"SB([23H])", description).group(1))  # type: ignore
+        return Base(re.fullmatch(r".*SB([23H])", description).group(1))  # type: ignore
 
     return None
