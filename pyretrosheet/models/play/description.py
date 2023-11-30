@@ -61,6 +61,7 @@ class Description:
             handled the ball for a play that did not result in an out, if any
         put_out_at_base: if a put out is made at a base not normally covered by the fielder,
             the base runner is given explicitly
+        stolen_base: a stolen base, if any
         raw: the raw play description
     """
 
@@ -71,6 +72,7 @@ class Description:
     fielder_handlers: dict[int, int]
     fielder_errors: dict[int, int]
     put_out_at_base: Base | None
+    stolen_base: Base | None
     raw: str
 
     @classmethod
@@ -92,6 +94,7 @@ class Description:
             fielder_handlers=_get_fielder_handlers(fielding_handler_plays),
             fielder_errors=_get_fielder_errors(description, batter_event, runner_event),
             put_out_at_base=_get_put_out_at_base(description, batter_event),
+            stolen_base=_get_stolen_base(description, runner_event),
             raw=description,
         )
 
@@ -203,12 +206,11 @@ def _get_fielding_out_plays(
             fielding_out_plays.extend(match.group(g) for g in [1, 2, 3])  # type: ignore
 
     match runner_event:
-        case RunnerEvent.CAUGHT_STEALING:
-            # error within caught stealing does not result in an out
-            if not re.fullmatch(r"CS[23H]\(.*E.*\)", description):
-                fielding_out_plays.append(re.fullmatch(r"CS[23H]\((.*)\)", description).group(1))  # type: ignore
+        case RunnerEvent.CAUGHT_STEALING | RunnerEvent.PICKED_OFF | RunnerEvent.PICKED_OFF_CAUGHT_STEALING:
+            # errors, 'E', does not result in an out so we skip these runner events
+            if not re.fullmatch(r".*\(.*E.*\)", description):
+                fielding_out_plays.append(re.fullmatch(r".*\((.*)\)", description).group(1))  # type: ignore
 
-    # @TODO match runner_event
     return fielding_out_plays
 
 
@@ -232,17 +234,20 @@ def _get_fielding_handler_plays(
             fielding_handler_plays.append(match.group(2))  # type: ignore
 
     match runner_event:
-        case RunnerEvent.CAUGHT_STEALING:
-            match = re.fullmatch(r"CS[23H]\((.*)\)", description)
+        case RunnerEvent.CAUGHT_STEALING | RunnerEvent.PICKED_OFF | RunnerEvent.PICKED_OFF_CAUGHT_STEALING:
+            match = re.fullmatch(r".*\((.*)\)", description)
             fielder_positions = match.group(1)  # type: ignore
             fielder_positions_not_part_of_an_error = []
+            has_error = False
             for i, fielder_position in enumerate(fielder_positions):
                 if fielder_position == "E" or fielder_positions[i - 1] == "E":
+                    has_error = True
                     continue
 
                 fielder_positions_not_part_of_an_error.append(fielder_position)
 
-            if fielder_positions_not_part_of_an_error:
+            # no outs would occur if there is an error
+            if fielder_positions_not_part_of_an_error and has_error:
                 fielding_handler_plays.append("".join(fielder_positions_not_part_of_an_error))
 
     # @TODO match runner_event
@@ -317,8 +322,8 @@ def _get_fielder_errors(
                 fielder_errors[int(fielder_position)] += 1
 
     match runner_event:
-        case RunnerEvent.CAUGHT_STEALING:
-            if match := re.fullmatch(r"CS[23H]\((.*E.*)\)", description):
+        case RunnerEvent.CAUGHT_STEALING | RunnerEvent.PICKED_OFF | RunnerEvent.PICKED_OFF_CAUGHT_STEALING:
+            if match := re.fullmatch(r".*\((.*E.*)\)", description):
                 fielder_positions = match.group(1)
                 for i, fielder_position in enumerate(fielder_positions):
                     if fielder_position == "E":
@@ -339,5 +344,12 @@ def _get_put_out_at_base(description: str, batter_event: BatterEvent | None) -> 
         match = re.fullmatch(r"\d+\((.)\)", description)
         if match:
             return Base(match.group(1))
+
+    return None
+
+
+def _get_stolen_base(description: str, runner_event: RunnerEvent | None) -> Base | None:
+    if runner_event == RunnerEvent.STOLEN_BASE:
+        return Base(re.fullmatch(r"SB([23H])", description).group(1))  # type: ignore
 
     return None

@@ -69,6 +69,10 @@ def test__get_runner_event(raw_description, expected_runner_event):
         ("1(B)23(1)4(2)", BatterEvent.LINED_INTO_TRIPLE_PLAY, None, ["1", "23", "4"]),
         ("CS2(E2)", None, RunnerEvent.CAUGHT_STEALING, []),
         ("CS2(12)", None, RunnerEvent.CAUGHT_STEALING, ["12"]),
+        ("PO(E1)", None, RunnerEvent.PICKED_OFF, []),
+        ("PO(1)", None, RunnerEvent.PICKED_OFF, ["1"]),
+        ("POCS(E1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, []),
+        ("POCS(1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, ["1"]),
     ],
 )
 def test__get_fielding_out_plays(raw_description, batter_event, runner_event, expected_fielding_out_plays):
@@ -88,7 +92,11 @@ def test__get_fielding_out_plays(raw_description, batter_event, runner_event, ex
         ("HR1", BatterEvent.HOME_RUN_INSIDE_PARK, None, ["1"]),
         ("CS2(E2)", None, RunnerEvent.CAUGHT_STEALING, []),
         ("CS2(1E2)", None, RunnerEvent.CAUGHT_STEALING, ["1"]),
-        ("CS2(12)", None, RunnerEvent.CAUGHT_STEALING, ["12"]),
+        ("CS2(12)", None, RunnerEvent.CAUGHT_STEALING, []),
+        ("PO(E1)", None, RunnerEvent.PICKED_OFF, []),
+        ("PO(1)", None, RunnerEvent.PICKED_OFF, []),
+        ("POCS(E1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, []),
+        ("POCS(1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, []),
     ],
 )
 def test__get_fielding_handler_plays(raw_description, batter_event, runner_event, expected_fielding_handler_plays):
@@ -130,6 +138,8 @@ def test__get_fielder_handlers():
         ("FLE1", BatterEvent.ERROR_ON_FOUL_FLY_BALL, None, {1: 1}),
         ("CS2(E2)", None, RunnerEvent.CAUGHT_STEALING, {2: 1}),
         ("CS2(1E2)", None, RunnerEvent.CAUGHT_STEALING, {2: 1}),
+        ("PO(E1)", None, RunnerEvent.PICKED_OFF, {1: 1}),
+        ("POCS(E1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, {1: 1}),
     ],
 )
 def test__get_fielder_errors(raw_description, batter_event, runner_event, expected_fielder_errors):
@@ -145,3 +155,12 @@ def test__get_fielder_errors(raw_description, batter_event, runner_event, expect
 )
 def test__get_put_out_at_base(raw_description, batter_event, expected_put_out_at_base):
     assert description._get_put_out_at_base(raw_description, batter_event) == expected_put_out_at_base
+
+
+def test__get_stolen_base():
+    raw_description = "SB2"
+    runner_event = RunnerEvent.STOLEN_BASE
+
+    stolen_base = description._get_stolen_base(raw_description, runner_event)
+
+    assert stolen_base == Base.SECOND_BASE
