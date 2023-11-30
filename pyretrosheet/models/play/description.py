@@ -36,6 +36,16 @@ class BatterEvent(Enum):
 class RunnerEvent(Enum):
     """Represents a runner event as part of a play's basic description."""
 
+    BALK = auto()
+    CAUGHT_STEALING = auto()
+    DEFENSIVE_INDIFFERENCE = auto()
+    OTHER_ADVANCE = auto()
+    PASSED_BALL = auto()
+    WILD_PITCH = auto()
+    PICKED_OFF = auto()
+    PICKED_OFF_CAUGHT_STEALING = auto()
+    STOLEN_BASE = auto()
+
 
 @dataclass
 class Description:
@@ -70,18 +80,17 @@ class Description:
         Args:
             description: the description part of a play's event
         """
-        # @TODO next up is K+event
         batter_event = _get_batter_event(description)
         runner_event = _get_runner_event(description)
-        fielding_out_plays = _get_fielding_out_plays(description, batter_event)
-        fielding_handler_plays = _get_fielding_handler_plays(description, batter_event)
+        fielding_out_plays = _get_fielding_out_plays(description, batter_event, runner_event)
+        fielding_handler_plays = _get_fielding_handler_plays(description, batter_event, runner_event)
         return cls(
             batter_event=batter_event,
             runner_event=runner_event,
             fielder_assists=_get_fielder_assists(fielding_out_plays),
             fielder_put_outs=_get_fielder_put_outs(fielding_out_plays),
             fielder_handlers=_get_fielder_handlers(fielding_handler_plays),
-            fielder_errors=_get_fielder_errors(description, batter_event),
+            fielder_errors=_get_fielder_errors(description, batter_event, runner_event),
             put_out_at_base=_get_put_out_at_base(description, batter_event),
             raw=description,
         )
@@ -114,6 +123,9 @@ def _get_batter_event(description: str) -> BatterEvent | None:
         r"HP": BatterEvent.HIT_BY_PITCH,
         r"DGR": BatterEvent.GROUND_RULE_DOUBLE,
         r"K": BatterEvent.STRIKEOUT,
+        r"W": BatterEvent.WALK,
+        r"I(W)?": BatterEvent.INTENTIONAL_WALK,
+        r"NP": BatterEvent.NO_PLAY,
     }
     for pattern, batter_event in pattern_to_batter_event.items():
         if re.fullmatch(pattern, description):
@@ -131,9 +143,32 @@ def _get_runner_event(description: str) -> RunnerEvent | None:
     Args:
         description: the description part of a play's event
     """
+    # Certain batting events are followed by a '+' and a runner event
+    # We remove the batting event and '+' in these cases to ease parsing
+    if match := re.fullmatch(r"(K|W|IW)\+(.*)", description):
+        description = match.group(2)
+
+    pattern_to_runner_event = {
+        r"BK": RunnerEvent.BALK,
+        r"CS[23H]\(.*\)": RunnerEvent.CAUGHT_STEALING,
+        r"DI": RunnerEvent.DEFENSIVE_INDIFFERENCE,
+        r"OA": RunnerEvent.OTHER_ADVANCE,
+        r"PB": RunnerEvent.PASSED_BALL,
+        r"WP": RunnerEvent.WILD_PITCH,
+        r"PO[123H]\(.*\)": RunnerEvent.PICKED_OFF,
+        r"POCS[123H]\(.*\)": RunnerEvent.PICKED_OFF_CAUGHT_STEALING,
+        r"SB[23H]": RunnerEvent.STOLEN_BASE,
+    }
+    for pattern, runner_event in pattern_to_runner_event.items():
+        if re.fullmatch(pattern, description):
+            return runner_event
+
+    return None
 
 
-def _get_fielding_out_plays(description: str, batter_event: BatterEvent | None) -> list[str]:
+def _get_fielding_out_plays(
+    description: str, batter_event: BatterEvent | None, runner_event: RunnerEvent | None
+) -> list[str]:
     """Get the fielding plays resulting in outs.
 
     Plays in this context is a string that contains the fielding positions of the fielders involved in the out.
@@ -141,6 +176,7 @@ def _get_fielding_out_plays(description: str, batter_event: BatterEvent | None) 
     Args:
         description: the description part of a play's event
         batter_event: the batting event, if it exists
+        runner_event: the runner event, if it exists
     """
     fielding_out_plays: list[str] = []
     match batter_event:
@@ -166,11 +202,19 @@ def _get_fielding_out_plays(description: str, batter_event: BatterEvent | None) 
             match = re.fullmatch(r"(\d+)\(.\)(\d+)\(.\)(\d+)\(.\)", description)
             fielding_out_plays.extend(match.group(g) for g in [1, 2, 3])  # type: ignore
 
+    match runner_event:
+        case RunnerEvent.CAUGHT_STEALING:
+            # error within caught stealing does not result in an out
+            if not re.fullmatch(r"CS[23H]\(.*E.*\)", description):
+                fielding_out_plays.append(re.fullmatch(r"CS[23H]\((.*)\)", description).group(1))  # type: ignore
+
     # @TODO match runner_event
     return fielding_out_plays
 
 
-def _get_fielding_handler_plays(description: str, batter_event: BatterEvent | None) -> list[str]:
+def _get_fielding_handler_plays(
+    description: str, batter_event: BatterEvent | None, runner_event: RunnerEvent | None
+) -> list[str]:
     """Get fielding handler plays (plays that did not result in error or outs).
 
     Plays in this context is a string that contains the fielding positions of the fielders involved in the handling
@@ -179,12 +223,27 @@ def _get_fielding_handler_plays(description: str, batter_event: BatterEvent | No
     Args:
         description: the description part of a play's event
         batter_event: the batting event, if it exists
+        runner_event: the runner event, if it exists
     """
     fielding_handler_plays: list[str] = []
     match batter_event:
         case BatterEvent.SINGLE | BatterEvent.DOUBLE | BatterEvent.TRIPLE | BatterEvent.FIELDERS_CHOICE | BatterEvent.HOME_RUN_INSIDE_PARK:
             match = re.fullmatch(r"(S|D|T|FC|H|HR)(\d+)", description)
             fielding_handler_plays.append(match.group(2))  # type: ignore
+
+    match runner_event:
+        case RunnerEvent.CAUGHT_STEALING:
+            match = re.fullmatch(r"CS[23H]\((.*)\)", description)
+            fielder_positions = match.group(1)  # type: ignore
+            fielder_positions_not_part_of_an_error = []
+            for i, fielder_position in enumerate(fielder_positions):
+                if fielder_position == "E" or fielder_positions[i - 1] == "E":
+                    continue
+
+                fielder_positions_not_part_of_an_error.append(fielder_position)
+
+            if fielder_positions_not_part_of_an_error:
+                fielding_handler_plays.append("".join(fielder_positions_not_part_of_an_error))
 
     # @TODO match runner_event
     return fielding_handler_plays
@@ -235,12 +294,15 @@ def _get_fielder_handlers(fielding_handler_plays: list[str]) -> dict[int, int]:
     return dict(fielder_handlers)
 
 
-def _get_fielder_errors(description: str, batter_event: BatterEvent | None) -> dict[int, int]:
+def _get_fielder_errors(
+    description: str, batter_event: BatterEvent | None, runner_event: RunnerEvent | None
+) -> dict[int, int]:
     """Get a map of fielder positions and the number of errors they made on the play.
 
     Args:
         description: the description part of a play's event
         batter_event: the batting event, if it exists
+        runner_event: the runner event, if it exists
     """
     fielder_errors: defaultdict[int, int] = defaultdict(int)
     match batter_event:
@@ -253,6 +315,15 @@ def _get_fielder_errors(description: str, batter_event: BatterEvent | None) -> d
             match = re.fullmatch(r"FLE(\d+)", description)
             for fielder_position in match.group(1):  # type: ignore
                 fielder_errors[int(fielder_position)] += 1
+
+    match runner_event:
+        case RunnerEvent.CAUGHT_STEALING:
+            if match := re.fullmatch(r"CS[23H]\((.*E.*)\)", description):
+                fielder_positions = match.group(1)
+                for i, fielder_position in enumerate(fielder_positions):
+                    if fielder_position == "E":
+                        # the fielder position following the 'E' is the player that made the error
+                        fielder_errors[int(fielder_positions[i + 1])] += 1
 
     return dict(fielder_errors)
 
