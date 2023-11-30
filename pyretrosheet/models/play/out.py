@@ -85,6 +85,7 @@ def _get_fielder_assists(out: str) -> list[int]:
     """Get fielder position numbers of fielders with an assist.
 
     Note that fielders are still given an assist even if an error follows them and an actual out does not occur,
+
     Args:
         out: the out description
     """

@@ -25,3 +25,22 @@ def test__get_bases(raw_advance, expected_from_base, expected_to_base):
 )
 def test__get_additional_info(raw_advance, expected_additional_info):
     assert advance._get_additional_info(raw_advance) == expected_additional_info
+
+
+@pytest.mark.parametrize(
+    ["raw_advance", "explicit_attr", "is_explicit"],
+    [
+        ("B-1", "is_unearned_explicit", False),
+        ("B-1", "is_rbi_credited_explicit", False),
+        ("B-1", "is_rbi_not_credited_explicit", False),
+        ("B-1", "is_team_unearned_run_explicit", False),
+        ("1-H(UR)", "is_unearned_explicit", True),
+        ("1-H(RBI)", "is_rbi_credited_explicit", True),
+        ("1-H(NORBI)", "is_rbi_not_credited_explicit", True),
+        ("1-H(TUR)", "is_team_unearned_run_explicit", True),
+    ],
+)
+def test_explicit_values(raw_advance, explicit_attr, is_explicit):
+    advance_ = advance.Advance.from_event_advance(raw_advance)
+
+    assert getattr(advance_, explicit_attr) == is_explicit
