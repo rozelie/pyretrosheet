@@ -13,15 +13,23 @@ class Out:
     Args:
         from_base: the base the player is coming from
         to_base: the base the player is advancing to
-        fielder_position_assists: the fielder positions of players assisting the out
-        fielder_position_put_out: the fielder position of the player putting the runner out
+        fielder_assists: map of the fielder positions of players to number of assists, if any
+        fielder_put_out: the fielder position of the player putting the runner out, if any player does a put out
+        fielder_errors: map of the fielder positions of players to number of errors committed, if any
+        fielder_handlers: map of the fielder positions of players to number of times the fielder
+            handled the ball for a play that did not result in a real out, if any
+        is_actual_out: if the out actually puts a player out (e.g. an error in the additional info
+            implies no actual out is made)
         raw: the raw out value
     """
 
     from_base: Base
     to_base: Base
-    fielder_position_assists: list[int]
-    fielder_position_put_out: int
+    fielder_assists: list[int]
+    fielder_put_out: int | None
+    fielder_handlers: list[int]
+    fielder_errors: list[int]
+    is_actual_out: bool
     raw: str
 
     @classmethod
@@ -30,25 +38,114 @@ class Out:
 
         Args:
             out: the out part of a play's event
-                Examples include: '1XH(862)'
+                Examples include: '1X2', '1XH(862)'
         """
-        from_base, to_base_raw = out.split("X")
-        to_base_match = re.search(r"(.)\(\d+\)", to_base_raw)
-        if to_base_match:
-            to_base = to_base_match.group(1)
-        else:
-            raise ParseError("to_base", to_base_raw)
-
-        fielder_positions_match = re.search(r".\((\d+)\)", to_base_raw)
-        if fielder_positions_match:
-            fielder_positions = fielder_positions_match.group(1)
-        else:
-            raise ParseError("fielding_positions", to_base_raw)
-
+        from_base, to_base = _get_bases(out)
+        is_actual_out = _is_actual_out(out)
         return cls(
-            from_base=Base(from_base),
-            to_base=Base(to_base),
-            fielder_position_put_out=int(fielder_positions[-1]),
-            fielder_position_assists=[int(p) for p in fielder_positions[:-1]] if len(fielder_positions) > 1 else [],
+            from_base=from_base,
+            to_base=to_base,
+            fielder_assists=_get_fielder_assists(out, is_actual_out),
+            fielder_put_out=_get_fielder_put_out(out, is_actual_out),
+            fielder_handlers=_get_fielder_handlers(out, is_actual_out),
+            fielder_errors=_get_fielder_errors(out, is_actual_out),
+            is_actual_out=is_actual_out,
             raw=out,
         )
+
+
+def _get_bases(out: str) -> tuple[Base, Base]:
+    """Get from and to bases from the out.
+
+    Args:
+        out: the out description
+    """
+    match = re.fullmatch(r"([B123H])X([B123H]).*", out)
+    if not match:
+        raise ParseError("bases_from_out", out)
+
+    return Base(match.group(1)), Base(match.group(2))
+
+
+def _is_actual_out(out: str) -> bool:
+    """Determine if the out is an actual out.
+
+    If there is an error within an out, the out does not occur.
+
+    Retrosheet Spec:
+        The error indicator negates the out.
+
+    Args:
+        out: the out description
+    """
+    return not bool(re.search(r"\(.*E.*\)", out))
+
+
+def _get_fielder_assists(out: str, is_actual_out: bool) -> list[int]:
+    """Get fielder position numbers of fielders with an assist.
+
+    Args:
+        out: the out description
+        is_actual_out: if the out is an actual out
+    """
+    if not is_actual_out:
+        return []
+
+    if match := re.fullmatch(r".*\((.*)\)", out):
+        fielder_positions = match.group(1)
+        return [int(p) for p in fielder_positions[:-1]] if len(fielder_positions) > 1 else []
+
+    return []
+
+
+def _get_fielder_put_out(out: str, is_actual_out: bool) -> int | None:
+    """Get the fielder position putting the runner out, if they exist.
+
+    Args:
+        out: the out description
+        is_actual_out: if the out is an actual out
+    """
+    if not is_actual_out:
+        return None
+
+    if match := re.fullmatch(r".*\((.*)\)", out):
+        return int(match.group(1)[-1])
+
+    return None
+
+
+def _get_fielder_handlers(out: str, is_actual_out: bool) -> list[int]:
+    """Get fielder position numbers of fielders handling the ball in the case of not an actual out occurring.
+
+    Args:
+        out: the out description
+        is_actual_out: if the out is an actual out
+    """
+    if is_actual_out:
+        return []
+
+    fielder_handlers = []
+    fielder_positions = re.fullmatch(r".*\((.*)\)", out).group(1)  # type: ignore
+    for i, fielder_position in enumerate(fielder_positions):
+        if fielder_position == "E" or fielder_positions[i - 1] == "E":
+            continue
+
+        fielder_handlers.append(int(fielder_position))
+
+    return fielder_handlers
+
+
+def _get_fielder_errors(out: str, is_actual_out: bool) -> list[int]:
+    """Get fielder position numbers of fielders committing an error on the out.
+
+    Args:
+        out: the out description
+        is_actual_out: if the out is an actual out
+    """
+    if is_actual_out:
+        return []
+
+    fielder_positions = re.fullmatch(r".*\((.*)\)", out).group(1)  # type: ignore
+    return [
+        int(fielder_position) for i, fielder_position in enumerate(fielder_positions) if fielder_positions[i - 1] == "E"
+    ]

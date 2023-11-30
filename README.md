@@ -8,7 +8,7 @@ data for all AL and NL seasons from 1919 to 2022).
 `pyretrosheet` provides functionality for:
 - downloading Retrosheet play-by-play data
 - parsing and loading play-by-play data into Python objects to make the data easier to understand and analyze
-- enriching data to include player and summary statistics not provided by Retrosheet
+- enriching data to include player and summary statistics not encoded directly by Retrosheet
 
 `pyretrosheet` does **not** provide functionality for:
 - downloading/using MLB data from sources other than Retrosheet
