@@ -48,25 +48,28 @@ class Game:
         earned_runs = {}
         for i, line in enumerate(game_lines):
             parts = line.split(",")
-            match parts[0]:
-                case "id":
-                    game_id = GameID.from_id_line(line)
+            try:
+                match parts[0]:
+                    case "id":
+                        game_id = GameID.from_id_line(line)
 
-                case "info":
-                    info[parts[1]] = parts[2]
+                    case "info":
+                        info[parts[1]] = parts[2]
 
-                case "start":
-                    chronological_events.append(Player.from_start_or_sub_line(line, is_sub=False))
+                    case "start":
+                        chronological_events.append(Player.from_start_or_sub_line(line, is_sub=False))
 
-                case "sub":
-                    chronological_events.append(Player.from_start_or_sub_line(line, is_sub=True))
+                    case "sub":
+                        chronological_events.append(Player.from_start_or_sub_line(line, is_sub=True))
 
-                case "play":
-                    comment_lines = list(_yield_comment_lines_following_play(i, game_lines))
-                    chronological_events.append(Play.from_play_line(line, comment_lines))
+                    case "play":
+                        comment_lines = list(_yield_comment_lines_following_play(i, game_lines))
+                        chronological_events.append(Play.from_play_line(line, comment_lines))
 
-                case "data":
-                    earned_runs[parts[2]] = int(parts[3])
+                    case "data":
+                        earned_runs[parts[2]] = int(parts[3])
+            except ParseError as e:
+                raise ParseError(e.looking_for_value, e.raw_value, line) from e
 
         if not game_id:
             raise GameIDNotFoundError(game_lines[0])
