@@ -52,6 +52,8 @@ def test__is_out(raw_advance, expected_is_out):
         (["7E4"], [7]),
         (["13"], [1]),
         (["123"], [1, 2]),
+        (["E2/TH"], []),
+        (["1E2/TH"], [1]),
     ],
 )
 def test__get_fielder_assists(additional_info, expected_fielder_assists):
@@ -79,6 +81,7 @@ def test__get_fielder_put_out(additional_info, is_out, expected_fielder_put_out)
         (["7E4"], False, [7]),
         (["27E4"], False, [2, 7]),
         (["27E45"], False, [2, 7, 5]),
+        (["1E2/TH"], False, [1]),
     ],
 )
 def test__get_fielder_handlers(additional_info, is_out, expected_fielder_handlers):

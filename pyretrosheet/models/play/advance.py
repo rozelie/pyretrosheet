@@ -1,5 +1,6 @@
 """Encapsulates Retrosheet advances as part of play data."""
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 from pyretrosheet.models.base import Base
@@ -9,7 +10,8 @@ UNEARNED_RUN = "UR"
 RBI_CREDITED = "RBI"
 RBI_NOT_CREDITED = "NORBI"
 TEAM_UNEARNED_RUN = "TUR"
-RESERVED_ADDITIONAL_INFO = [UNEARNED_RUN, RBI_CREDITED, RBI_NOT_CREDITED, TEAM_UNEARNED_RUN]
+THROW = "TH"
+RESERVED_ADDITIONAL_INFO = [UNEARNED_RUN, RBI_CREDITED, RBI_NOT_CREDITED, TEAM_UNEARNED_RUN, THROW]
 
 
 @dataclass
@@ -130,10 +132,7 @@ def _get_fielder_assists(additional_info: list[str]) -> list[int]:
         additional_info: advance additional info
     """
     fielder_assists = []
-    for info in additional_info:
-        if info in RESERVED_ADDITIONAL_INFO:
-            continue
-
+    for info in _iter_additional_info_and_parts(additional_info):
         for i, fielder_position in enumerate(info):
             if fielder_position == "E" or info[i - 1] == "E" or i == len(info) - 1:
                 continue
@@ -153,10 +152,7 @@ def _get_fielder_put_out(additional_info: list[str], is_out: bool) -> int | None
     if not is_out:
         return None
 
-    for info in additional_info:
-        if info in RESERVED_ADDITIONAL_INFO:
-            continue
-
+    for info in _iter_additional_info_and_parts(additional_info):
         return int(info[-1])
 
     return None
@@ -173,10 +169,7 @@ def _get_fielder_handlers(additional_info: list[str], is_out: bool) -> list[int]
         return []
 
     fielder_handlers = []
-    for info in additional_info:
-        if info in RESERVED_ADDITIONAL_INFO:
-            continue
-
+    for info in _iter_additional_info_and_parts(additional_info):
         for i, fielder_position in enumerate(info):
             if fielder_position == "E" or info[i - 1] == "E":
                 continue
@@ -197,12 +190,26 @@ def _get_fielder_errors(additional_info: list[str], is_out: bool) -> list[int]:
         return []
 
     fielder_errors = []
-    for info in additional_info:
-        if info in RESERVED_ADDITIONAL_INFO:
-            continue
-
+    for info in _iter_additional_info_and_parts(additional_info):
         for i, fielder_position in enumerate(info):
             if fielder_position == "E":
                 fielder_errors.append(int(info[i + 1]))
 
     return fielder_errors
+
+
+def _iter_additional_info_and_parts(
+    additional_info: list[str], include_reserved_additional_info: bool = False
+) -> Iterator[str]:
+    """Iterate additional info and any sub-parts (delimited by '/').
+
+    Args:
+        additional_info: advance additional info
+        include_reserved_additional_info: include info and sub-parts that are reserved
+    """
+    for info in additional_info:
+        for part in info.split("/"):
+            if not include_reserved_additional_info and part in RESERVED_ADDITIONAL_INFO:
+                continue
+
+            yield part
