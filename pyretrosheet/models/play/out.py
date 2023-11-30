@@ -45,7 +45,7 @@ class Out:
         return cls(
             from_base=from_base,
             to_base=to_base,
-            fielder_assists=_get_fielder_assists(out, is_actual_out),
+            fielder_assists=_get_fielder_assists(out),
             fielder_put_out=_get_fielder_put_out(out, is_actual_out),
             fielder_handlers=_get_fielder_handlers(out, is_actual_out),
             fielder_errors=_get_fielder_errors(out, is_actual_out),
@@ -81,21 +81,23 @@ def _is_actual_out(out: str) -> bool:
     return not bool(re.search(r"\(.*E.*\)", out))
 
 
-def _get_fielder_assists(out: str, is_actual_out: bool) -> list[int]:
+def _get_fielder_assists(out: str) -> list[int]:
     """Get fielder position numbers of fielders with an assist.
 
+    Note that fielders are still given an assist even if an error follows them and an actual out does not occur,
     Args:
         out: the out description
-        is_actual_out: if the out is an actual out
     """
-    if not is_actual_out:
-        return []
-
+    fielder_assists = []
     if match := re.fullmatch(r".*\((.*)\)", out):
         fielder_positions = match.group(1)
-        return [int(p) for p in fielder_positions[:-1]] if len(fielder_positions) > 1 else []
+        for i, fielder_position in enumerate(fielder_positions):
+            if fielder_position == "E" or fielder_positions[i - 1] == "E" or i == len(fielder_positions) - 1:
+                continue
 
-    return []
+            fielder_assists.append(int(fielder_position))
+
+    return fielder_assists
 
 
 def _get_fielder_put_out(out: str, is_actual_out: bool) -> int | None:

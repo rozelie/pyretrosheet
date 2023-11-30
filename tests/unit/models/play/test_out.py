@@ -29,17 +29,17 @@ def test__is_actual_out(raw_out, expected_is_actual_out):
 
 
 @pytest.mark.parametrize(
-    ["raw_out", "is_actual_out", "expected_fielder_assists"],
+    ["raw_out", "expected_fielder_assists"],
     [
-        ("BX2(7E4)", False, []),
-        ("1X2", True, []),
-        ("1X2(1)", True, []),
-        ("1X2(13)", True, [1]),
-        ("1X2(123)", True, [1, 2]),
+        # ("1X2", []),
+        # ("1X2(1)", []),
+        ("BX2(7E4)", [7]),
+        ("1X2(13)", [1]),
+        ("1X2(123)", [1, 2]),
     ],
 )
-def test__get_fielder_assists(raw_out, is_actual_out, expected_fielder_assists):
-    assert out._get_fielder_assists(raw_out, is_actual_out) == expected_fielder_assists
+def test__get_fielder_assists(raw_out, expected_fielder_assists):
+    assert out._get_fielder_assists(raw_out) == expected_fielder_assists
 
 
 @pytest.mark.parametrize(
