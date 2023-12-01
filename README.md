@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/pyretrosheet.svg)](https://badge.fury.io/py/pyretrosheet) ![Coverage](assets/coverage.svg)
 
-> `pyretrosheet` is under active development and a formal release has not yet been made (but hopefully will be soon!).`
+> `pyretrosheet` is under active development and a formal release has not yet been made (but hopefully will be soon!).
 
 Load, analyze, and enrich [retrosheet.org](https://www.retrosheet.org) MLB data.
 
