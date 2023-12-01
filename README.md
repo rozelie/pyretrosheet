@@ -2,9 +2,9 @@
 
 [![PyPI version](https://badge.fury.io/py/pyretrosheet.svg)](https://badge.fury.io/py/pyretrosheet) ![Coverage](assets/coverage.svg)
 
-> `pyretrosheet` is under active development and a formal release has not yet been made (but hopefully will be soon!).
+> `pyretrosheet` is under active development and is not feature complete.
 
-Load, analyze, and enrich [retrosheet.org](https://www.retrosheet.org) MLB data into Python representations.
+Load, analyze, and enrich [retrosheet.org](https://www.retrosheet.org) MLB data using Python representations.
 
 Retrosheet provides play-by-play and other miscellaneous MLB data (at the time of writing, includes all play-by-play 
 data for all AL and NL seasons from 1919 to 2022).
@@ -27,30 +27,28 @@ pip install pyretrosheet
 ```
 
 ## Load Games
-By default, data downloaded from [retrosheet.org](https://www.retrosheet.org) is stored at `~/.pyretrosheet/data/`, but can be overriden via the `data_dir` argument.
+By default, data downloaded from [retrosheet.org](https://www.retrosheet.org) is stored at `~/.pyretrosheet/data/`, 
+but can be overriden via the `data_dir` argument.
+
 ```python
 import pyretrosheet
 
-# load games for a given year
-games = pyretrosheet.load_games(
-    year=2022,
-    # data_dir="~/.pyretrosheet/data/",
-    # force_download=False,
+# generator for loading games in a given year
+games = pyretrosheet.load_games(year=2022)
+
+print(list(games)[0])
+"""
+Game(
+  id=GameID(home_team_id='SFN', date=datetime.date(2022, 4, 8), game_number=0, raw='id,SFN202204080'),
+  home_team_id=SFN,
+  visiting_team_id=MIA,
+  num_chronological_events=150,
+  earned_runs={'bleir001': 1, 'alcas001': 2, 'bassa001': 1, 'benda001': 1, 'webbl001': 1, 'dovac001': 3, 'leond003': 1},
 )
 """
-list(games) = [
-    Game(...),
-    ...
-]
-"""
 ```
 
-```pycon
-> import pyretrosheet
-> games
-```
-
-**TODO**
+**TODO**: Add more examples
 
 # Data Availability
 ## Retrosheet Event File Coverage
