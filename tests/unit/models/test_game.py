@@ -10,7 +10,7 @@ class TestGame:
 
         game_ = game.Game.from_game_lines(game_lines)
 
-        assert game_.game_id.raw == "id,WAS202204070"
+        assert game_.id.raw == "id,WAS202204070"
         assert game_.home_team_id == "WAS"
         assert game_.visiting_team_id == "NYN"
         assert len(game_.chronological_events) == 129

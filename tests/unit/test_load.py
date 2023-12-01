@@ -25,5 +25,5 @@ def test__iter_games_from_play_by_play_file():
     games = list(load._iter_games_from_play_by_play_file(play_by_play_file))
 
     game_one, game_two = games
-    assert game_one.game_id.raw == "id,WAS202204070"
-    assert game_two.game_id.raw == "id,WAS202204080"
+    assert game_one.id.raw == "id,WAS202204070"
+    assert game_two.id.raw == "id,WAS202204080"

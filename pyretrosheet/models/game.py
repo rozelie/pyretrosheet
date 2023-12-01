@@ -28,16 +28,29 @@ class Game:
     """A game as defined in Retrosheet.
 
     Args:
-        game_id: the game id
+        id: the game's id
         info: miscellaneous encoded information like temperature, attendance, umpire names, etc.
         chronological_events: the chronological order of events occurring
         earned_runs: map of player id to earned runs
     """
 
-    game_id: GameID
+    id: GameID
     info: dict[str, str]
     chronological_events: ChronologicalEvents
     earned_runs: dict[str, int]
+
+    def __repr__(self) -> str:
+        """Pretty representation of a game."""
+        lines = [
+            "Game(",
+            f"  id={self.id},",
+            f"  home_team_id={self.home_team_id},",
+            f"  visiting_team_id={self.visiting_team_id},",
+            f"  num_chronological_events={len(self.chronological_events)},",
+            f"  earned_runs={self.earned_runs},",
+            ")",
+        ]
+        return "\n".join(lines)
 
     @classmethod
     def from_game_lines(cls, game_lines: list[str]) -> "Game":
@@ -46,7 +59,7 @@ class Game:
         Args:
             game_lines: game lines from a game
         """
-        game_id = None
+        id_ = None
         info = {}
         chronological_events: ChronologicalEvents = []
         earned_runs = {}
@@ -55,7 +68,7 @@ class Game:
             try:
                 match parts[0]:
                     case "id":
-                        game_id = GameID.from_id_line(line)
+                        id_ = GameID.from_id_line(line)
 
                     case "info":
                         info[parts[1]] = parts[2]
@@ -77,11 +90,11 @@ class Game:
             except Exception as e:
                 raise ParseError("unknown", "unknown", line) from e
 
-        if not game_id:
+        if not id_:
             raise GameIDNotFoundError(game_lines[0])
 
         return cls(
-            game_id=game_id,
+            id=id_,
             info=info,
             chronological_events=chronological_events,
             earned_runs=earned_runs,

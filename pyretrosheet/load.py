@@ -20,7 +20,7 @@ def load_games(year: int, data_dir: Path | str = DEFAULT_DATA_DIR, force_downloa
         force_download: force a fresh download of the data even if it already exists
     """
     data_dir = data_dir if isinstance(data_dir, Path) else Path(data_dir)
-    data_dir.mkdir(exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
     for play_by_play_file in retrosheet.retrieve_years_play_by_play_files(
         year=year,
         data_dir=Path(data_dir) or DEFAULT_DATA_DIR,
