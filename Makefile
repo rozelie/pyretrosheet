@@ -27,17 +27,17 @@ lint:  ## Run ruff and mypy on package files.
 	${VENV_BIN}/mypy ${SRC_DIR}
 
 bump_version:  ## Increment minor version references in the project
-	${PYTHON} -m pip install --upgrade bump-my-version
-	bump-my-version bump --current-version 0.0.1 minor
+	${PYTHON} -m pip install --upgrade bumpversion
+	bumpversion minor
 
 publish_to_testpypi:  ## Publish the package to test.pypi.org.
 	# register account at https://test.pypi.org/account/register/
 	${PYTHON} -m pip install --upgrade build twine
 	${PYTHON} -m build
 
-
 publish_to_pypi:  ## Publish the package to pypi.org.
 	# register account at https://pypi.org/account/register/
+	$(MAKE) bump_version
 	${PYTHON} -m pip install --upgrade build twine
 	${PYTHON} -m build
 	${PYTHON} -m twine upload --repository pypi dist/*
