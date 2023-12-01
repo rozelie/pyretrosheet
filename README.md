@@ -1,5 +1,7 @@
 # pyretrosheet
 
+> `pyretrosheet` is under active development and a formal release has not yet been made (but hopefully will be soon!).`
+
 Load, analyze, and enrich [retrosheet.org](https://www.retrosheet.org) MLB data.
 
 Retrosheet provides play-by-play and other miscellaneous MLB data (at the time of writing, includes all play-by-play 
@@ -76,10 +78,13 @@ publish_to_pypi:  Publish the package to pypi.org.
 
 ## Todo
 - Parse out 'info' fields into `pyretrosheet.models.Game` properties
+- Implement versions for a release
+- Encoding pitches from `play` data
 - Implement index of game files to easily lookup games for:
     - a specific team within a year
     - a specific game
 - Determine top-level interface for querying data
+- Verify enriched data with alternative sources like Baseball Reference
 
 # Credits
 - Project skeleton generated via `cookiecutter https://github.com/rozelie/Python-Project-Cookiecutter`
