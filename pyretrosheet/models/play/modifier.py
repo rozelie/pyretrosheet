@@ -55,6 +55,7 @@ class ModifierType(Enum):
     UMPIRE_INTERFERENCE = auto()
     UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD = auto()
     HIT_LOCATION = auto()
+    UNKNOWN = auto()
 
 
 @dataclass
@@ -64,14 +65,14 @@ class Modifier:
     Args:
         type: the type of modifier, as defined in Retrosheet spec
         hit_location: a hit location, if it exists
-        fielder_position: a fielder position relevant to the modifier, if it exists
+        fielder_positions: fielder positions relevant to the modifier, if they exist
         base: a base relevant to the modifier, if it exists
         raw: the raw play modifier
     """
 
     type: ModifierType
     hit_location: str | None
-    fielder_position: int | None
+    fielder_positions: list[int]
     base: Base | None
     raw: str
 
@@ -86,7 +87,7 @@ class Modifier:
         return cls(
             type=modifier_type,
             hit_location=_get_hit_location(modifier, modifier_type),
-            fielder_position=_get_fielder_position(modifier, modifier_type),
+            fielder_positions=_get_fielder_positions(modifier, modifier_type),
             base=_get_base(modifier, modifier_type),
             raw=modifier,
         )
@@ -144,6 +145,8 @@ def _get_modifier_type(modifier: str) -> ModifierType:
         r"UINT(\d+.*)?": ModifierType.UMPIRE_INTERFERENCE,
         r"UREV(\d+.*)?": ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD,
         r"\d+.*": ModifierType.HIT_LOCATION,
+        r"THH": ModifierType.UNKNOWN,
+        r"BF": ModifierType.UNKNOWN,
     }
     for pattern, modifier_type in pattern_to_modifier_type.items():
         if re.fullmatch(pattern, modifier):
@@ -173,17 +176,17 @@ def _get_hit_location(modifier: str, modifier_type: ModifierType) -> str | None:
     return None
 
 
-def _get_fielder_position(modifier: str, modifier_type: ModifierType) -> int | None:
-    """Get the fielder position from the modifier, if it exists.
+def _get_fielder_positions(modifier: str, modifier_type: ModifierType) -> list[int]:
+    """Get the fielder positions from the modifier, if they exist.
 
     Args:
         modifier: a modifier part of a play's event
         modifier_type: the type of modifier
     """
     if modifier_type in [ModifierType.ERROR, ModifierType.RELAY_THROW]:
-        return int(re.fullmatch(r"[ER](\d)", modifier).group(1))  # type: ignore
+        return [int(p) for p in re.fullmatch(r"[ER](\d+)", modifier).group(1)]  # type: ignore
 
-    return None
+    return []
 
 
 def _get_base(modifier: str, modifier_type: ModifierType) -> Base | None:

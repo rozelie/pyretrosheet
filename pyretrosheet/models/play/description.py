@@ -238,19 +238,20 @@ def _get_fielding_handler_plays(
             match = re.fullmatch(r".*\((.*)\)", description)
             fielder_positions = match.group(1)  # type: ignore
             fielder_positions_not_part_of_an_error = []
-            has_error = False
-            for i, fielder_position in enumerate(fielder_positions):
-                if fielder_position == "E" or fielder_positions[i - 1] == "E":
-                    has_error = True
-                    continue
+            parts = fielder_positions.split("/")
+            for part in parts:
+                has_error = False
+                for i, fielder_position in enumerate(part):
+                    if fielder_position == "E" or part[i - 1] == "E":
+                        has_error = True
+                        continue
 
-                fielder_positions_not_part_of_an_error.append(fielder_position)
+                    fielder_positions_not_part_of_an_error.append(fielder_position)
 
-            # no outs would occur if there is an error
-            if fielder_positions_not_part_of_an_error and has_error:
-                fielding_handler_plays.append("".join(fielder_positions_not_part_of_an_error))
+                # no outs would occur if there is an error
+                if fielder_positions_not_part_of_an_error and has_error:
+                    fielding_handler_plays.append("".join(fielder_positions_not_part_of_an_error))
 
-    # @TODO match runner_event
     return fielding_handler_plays
 
 

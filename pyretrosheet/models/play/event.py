@@ -1,4 +1,5 @@
 """Encapsulates Retrosheet event as part of play data."""
+import re
 from dataclasses import dataclass
 
 from pyretrosheet.models.play.advance import Advance
@@ -36,7 +37,17 @@ class Event:
             description_and_modifiers = event
             advances = []
 
-        description, *modifiers = description_and_modifiers.split("/")
+        # I shamelessly used ChatGPT for this pattern since it's difficult to separate the description and modifiers
+        # consistently.
+        # Examples (description and modifiers split out):
+        # A => 'A', []
+        # A/B/C => 'A', ['B', 'C']
+        # A(1/2) => 'A(1/2)', []
+        # A(1/2)/B => 'A(1/2)', ['B']
+        pattern = re.compile(r'^([^/]+(?:/[^/(]+(?:\([^)]*\))?[^/]*)*)$')
+        match = pattern.match(description_and_modifiers)
+        description = match.group(1)
+        modifiers = [group for group in match.groups()[1:] if group is not None]
         return cls(
             description=Description.from_event_description(description),
             modifiers=[Modifier.from_event_modifier(m) for m in modifiers],

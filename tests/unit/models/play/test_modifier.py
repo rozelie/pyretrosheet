@@ -52,6 +52,8 @@ from pyretrosheet.models.play.modifier import ModifierType
         ("UINT", ModifierType.UMPIRE_INTERFERENCE),
         ("UREV", ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD),
         ("78", ModifierType.HIT_LOCATION),
+        ("THH", ModifierType.UNKNOWN),
+        ("BF", ModifierType.UNKNOWN),
     ],
 )
 def test__get_modifier_type(raw_modifier, expected_modifier_type):
@@ -81,12 +83,13 @@ def test__get_hit_location(raw_modifier, modifier_type, expected_hit_location):
 @pytest.mark.parametrize(
     ["raw_modifier", "modifier_type", "expected_fielder_position"],
     [
-        ("E1", ModifierType.ERROR, 1),
-        ("R1", ModifierType.RELAY_THROW, 1),
+        ("E1", ModifierType.ERROR, [1]),
+        ("R1", ModifierType.RELAY_THROW, [1]),
+        ("R25", ModifierType.RELAY_THROW, [2, 5]),
     ],
 )
-def test__get_fielder_position(raw_modifier, modifier_type, expected_fielder_position):
-    assert modifier._get_fielder_position(raw_modifier, modifier_type) == expected_fielder_position
+def test__get_fielder_positions(raw_modifier, modifier_type, expected_fielder_position):
+    assert modifier._get_fielder_positions(raw_modifier, modifier_type) == expected_fielder_position
 
 
 @pytest.mark.parametrize(

@@ -95,6 +95,7 @@ def test__get_fielding_out_plays(raw_description, batter_event, runner_event, ex
         ("CS2(12)", None, RunnerEvent.CAUGHT_STEALING, []),
         ("PO(E1)", None, RunnerEvent.PICKED_OFF, []),
         ("PO(1)", None, RunnerEvent.PICKED_OFF, []),
+        ("PO(E1/TH)", None, RunnerEvent.PICKED_OFF, []),
         ("POCS(E1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, []),
         ("POCS(1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, []),
     ],

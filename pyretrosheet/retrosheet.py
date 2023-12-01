@@ -41,19 +41,20 @@ class RetrosheetClient:
 
 
 def retrieve_years_play_by_play_files(
-    retrosheet_client: RetrosheetClient,
     year: int,
     data_dir: Path,
+    retrosheet_client: RetrosheetClient | None = None,
     force_download: bool = False,
 ) -> list[Path]:
     """Retrieve a year's play-by-play files.
 
     Args:
-        retrosheet_client: a Retrosheet client
         year: the year to retrieve play-by-play files for
         data_dir: the dir to retrieve/store play-by-play files from/to
+        retrosheet_client: a Retrosheet client
         force_download: do not use existing data and force a new download of the data
     """
+    retrosheet_client = retrosheet_client or RetrosheetClient()
     data_files = list(_yield_years_play_by_play_files(data_dir, year))
     if data_files and not force_download:
         return data_files

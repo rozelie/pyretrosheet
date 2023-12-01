@@ -32,10 +32,9 @@ class GameID:
             id_line: the 'id' line
         """
         id_value = id_line.split(",")[1]
-        raw_date = "".join([c for c in id_value if c.isnumeric()][:-1])
         return cls(
-            home_team_id="".join([c for c in id_value if c.isalpha()]),
-            date=dt.date(year=int(raw_date[0:4]), month=int(raw_date[4:6]), day=int(raw_date[6:8])),
+            home_team_id=id_value[:3],
+            date=dt.date(year=int(id_value[3:7]), month=int(id_value[7:9]), day=int(id_value[9:11])),
             game_number=int(id_value[-1]),
             raw=id_line,
         )
