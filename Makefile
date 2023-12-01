@@ -26,9 +26,9 @@ lint:  ## Run ruff and mypy on package files.
 	${VENV_BIN}/ruff ${SRC_DIR}
 	${VENV_BIN}/mypy ${SRC_DIR}
 
-bump_version:  ## Increment minor version references in the project
+bump_version:  ## Increment patch version references in the project
 	${PYTHON} -m pip install --upgrade bumpversion
-	bumpversion minor
+	bumpversion patch
 
 publish_to_testpypi:  ## Publish the package to test.pypi.org.
 	# register account at https://test.pypi.org/account/register/
