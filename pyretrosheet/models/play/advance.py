@@ -1,8 +1,8 @@
 """Encapsulates Retrosheet advances as part of play data."""
-from enum import Enum
 import re
 from collections.abc import Iterator
 from dataclasses import dataclass
+from enum import Enum
 
 from pyretrosheet.models.base import Base
 from pyretrosheet.models.exceptions import ParseError
@@ -77,7 +77,10 @@ class Advance:
             is_out=is_out,
             is_unearned_run_explicit=RunAccreditation.UNEARNED_RUN.value in additional_info,
             is_rbi_credited_explicit=RunAccreditation.RBI_CREDITED.value in additional_info,
-            is_rbi_not_credited_explicit=RunAccreditation.RBI_NOT_CREDITED.value in additional_info or RunAccreditation.RBI_NOT_CREDITED_2 in additional_info,
+            is_rbi_not_credited_explicit=(
+                RunAccreditation.RBI_NOT_CREDITED.value in additional_info
+                or RunAccreditation.RBI_NOT_CREDITED_2.value in additional_info
+            ),
             is_team_unearned_run_explicit=RunAccreditation.TEAM_UNEARNED_RUN.value in additional_info,
             raw=advance,
         )

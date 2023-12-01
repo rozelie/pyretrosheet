@@ -2,6 +2,7 @@
 import re
 from dataclasses import dataclass
 
+from pyretrosheet.models.exceptions import ParseError
 from pyretrosheet.models.play.advance import Advance
 from pyretrosheet.models.play.description import Description
 from pyretrosheet.models.play.modifier import Modifier
@@ -26,7 +27,7 @@ class Event:
         """
         # Retrosheet docs indicate these characters at the end of the string can be safely ignored.
         # They indicate sentiment values (uncertainty in a play, hard hit ball, etc.).
-        for char in "#!?+-":
+        for char in "#!?+-/":
             if event.endswith(char):
                 event = event[:-1]
 
@@ -44,10 +45,14 @@ class Event:
         # A/B/C => 'A', ['B', 'C']
         # A(1/2) => 'A(1/2)', []
         # A(1/2)/B => 'A(1/2)', ['B']
-        pattern = re.compile(r'^([^/]+(?:/[^/(]+(?:\([^)]*\))?[^/]*)*)$')
+        pattern = re.compile(r"^([^/]+(?:/[^/(]+(?:\([^)]*\))?[^/]*)*)$")
         match = pattern.match(description_and_modifiers)
-        description = match.group(1)
-        modifiers = [group for group in match.groups()[1:] if group is not None]
+        try:
+            description = match.group(1)  # type: ignore
+            modifiers = [group for group in match.groups()[1:] if group is not None]  # type: ignore
+        except AttributeError as e:
+            raise ParseError("description_and_modifiers", event) from e
+
         return cls(
             description=Description.from_event_description(description),
             modifiers=[Modifier.from_event_modifier(m) for m in modifiers],
