@@ -41,4 +41,5 @@ publish_to_pypi:  ## Publish the package to pypi.org.
 	${PYTHON} -m pip install --upgrade build twine
 	${PYTHON} -m build
 	${PYTHON} -m twine upload --repository pypi dist/*
+	git push main --tags
 	rm -rf dist
