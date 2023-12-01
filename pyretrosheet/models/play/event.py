@@ -38,6 +38,13 @@ class Event:
             description_and_modifiers = event
             advances = []
 
+        # there are cases of double slashes which I do not believe adds any extra info - remove them
+        description_and_modifiers = description_and_modifiers.replace("//", "/")
+
+        # remove trailing slashes - does not encode anything
+        if description_and_modifiers.endswith("/"):
+            description_and_modifiers = description_and_modifiers[:-1]
+
         # I shamelessly used ChatGPT for this pattern since it's difficult to separate the description and modifiers
         # consistently.
         # Examples (description and modifiers split out):

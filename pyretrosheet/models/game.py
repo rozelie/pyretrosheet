@@ -74,6 +74,8 @@ class Game:
                         earned_runs[parts[2]] = int(parts[3])
             except ParseError as e:
                 raise ParseError(e.looking_for_value, e.raw_value, line) from e
+            except Exception as e:
+                raise ParseError("unknown", "unknown", line) from e
 
         if not game_id:
             raise GameIDNotFoundError(game_lines[0])

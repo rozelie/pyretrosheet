@@ -34,9 +34,15 @@ class Player:
                 Examples include: 'start,richg001,"Gene Richards",0,1,7', 'sub,votha001,"Austin Voth",1,0,1'
             is_sub: whether the player is coming from a sub line or not
         """
-        # Cases where there delimiter of first and last name is a comma instead of a space
-        if "Clyde,Barfoot" in start_or_sub_line:
-            start_or_sub_line = start_or_sub_line.replace("Clyde,Barfoot", "Clyde Barfoot")
+        # handle rare cases where a comma is within a player's name
+        for name, new_name in [
+            ("George Watkins,", "George Watkins"),
+            ("Clyde,Barfoot", "Clyde Barfoot"),
+            ("Burgess,Smoky", "Burgess Smoky"),
+            ("Richie Scheinblum,", "Richie Scheinblum"),
+        ]:
+            if name in start_or_sub_line:
+                start_or_sub_line = start_or_sub_line.replace(name, new_name)
 
         _, player_id, name, team_location, batting_order_position, fielding_position = start_or_sub_line.split(",")
         return cls(

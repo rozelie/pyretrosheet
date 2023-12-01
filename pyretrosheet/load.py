@@ -1,5 +1,4 @@
 """Load raw Retrosheet data into models."""
-
 from collections.abc import Iterator
 from copy import deepcopy
 from pathlib import Path

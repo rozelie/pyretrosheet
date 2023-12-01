@@ -53,8 +53,8 @@ def test__is_out(raw_advance, expected_is_out):
         (["13"], [1]),
         (["123"], [1, 2]),
         (["WP", "NR"], []),
-        (["E2/TH"], []),
-        (["1E2/TH"], [1]),
+        (["E2"], []),
+        (["1E2"], [1]),
     ],
 )
 def test__get_fielder_assists(additional_info, expected_fielder_assists):
@@ -125,7 +125,7 @@ def test_explicit_values(raw_advance, explicit_attr, is_explicit):
 @pytest.mark.parametrize(
     ["additional_info", "expected_parts"],
     [
-        (["WP", "TH", "TH1", "PB", "THH"], []),
+        (["WP", "TH", "TH1", "PB", "THH", "BR", "OBS"], []),
         (["1", "12" "1E1"], ["1", "12" "1E1"]),
     ],
 )

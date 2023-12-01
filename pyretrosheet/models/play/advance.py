@@ -215,10 +215,14 @@ def _iter_additional_info_and_parts(
         include_run_accreditations: include run accreditations additional info
     """
     # ignore parts that are not useful in fielding calculations
-    ignore_parts_re = r"(WP|TH(\d)?|PB|THH)"
+    ignore_parts_re = r"(WP|TH(\d)?|PB|THH|BR|OBS)"
     for info in additional_info:
         for part in info.split("/"):
             if re.fullmatch(ignore_parts_re, part):
+                continue
+
+            # it is unclear what info like `8-2` represents
+            if re.fullmatch(r"\d-\d", part):
                 continue
 
             try:
