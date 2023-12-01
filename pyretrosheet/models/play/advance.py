@@ -1,4 +1,5 @@
 """Encapsulates Retrosheet advances as part of play data."""
+from enum import Enum
 import re
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -6,22 +7,15 @@ from dataclasses import dataclass
 from pyretrosheet.models.base import Base
 from pyretrosheet.models.exceptions import ParseError
 
-UNEARNED_RUN = "UR"
-RBI_CREDITED = "RBI"
-RBI_NOT_CREDITED = "NORBI"
-RBI_NOT_CREDITED_2 = "NR"
-TEAM_UNEARNED_RUN = "TUR"
-THROW = "TH"
-WILD_PITCH = "WP"
-RESERVED_ADDITIONAL_INFO = [
-    UNEARNED_RUN,
-    RBI_CREDITED,
-    RBI_NOT_CREDITED,
-    RBI_NOT_CREDITED_2,
-    TEAM_UNEARNED_RUN,
-    THROW,
-    WILD_PITCH,
-]
+
+class RunAccreditation(Enum):
+    """Accreditations for a run."""
+
+    UNEARNED_RUN = "UR"
+    RBI_CREDITED = "RBI"
+    RBI_NOT_CREDITED = "NORBI"
+    RBI_NOT_CREDITED_2 = "NR"
+    TEAM_UNEARNED_RUN = "TUR"
 
 
 @dataclass
@@ -81,10 +75,10 @@ class Advance:
             fielder_handlers=_get_fielder_handlers(additional_info, is_out),
             fielder_errors=_get_fielder_errors(additional_info, is_out),
             is_out=is_out,
-            is_unearned_run_explicit=UNEARNED_RUN in additional_info,
-            is_rbi_credited_explicit=RBI_CREDITED in additional_info,
-            is_rbi_not_credited_explicit=RBI_NOT_CREDITED in additional_info,
-            is_team_unearned_run_explicit=TEAM_UNEARNED_RUN in additional_info,
+            is_unearned_run_explicit=RunAccreditation.UNEARNED_RUN.value in additional_info,
+            is_rbi_credited_explicit=RunAccreditation.RBI_CREDITED.value in additional_info,
+            is_rbi_not_credited_explicit=RunAccreditation.RBI_NOT_CREDITED.value in additional_info or RunAccreditation.RBI_NOT_CREDITED_2 in additional_info,
+            is_team_unearned_run_explicit=RunAccreditation.TEAM_UNEARNED_RUN.value in additional_info,
             raw=advance,
         )
 
@@ -209,17 +203,27 @@ def _get_fielder_errors(additional_info: list[str], is_out: bool) -> list[int]:
 
 
 def _iter_additional_info_and_parts(
-    additional_info: list[str], include_reserved_additional_info: bool = False
+    additional_info: list[str], include_run_accreditations: bool = False
 ) -> Iterator[str]:
     """Iterate additional info and any sub-parts (delimited by '/').
 
     Args:
         additional_info: advance additional info
-        include_reserved_additional_info: include info and sub-parts that are reserved
+        include_run_accreditations: include run accreditations additional info
     """
+    # ignore parts that are not useful in fielding calculations
+    ignore_parts_re = r"(WP|TH(\d)?|PB|THH)"
     for info in additional_info:
         for part in info.split("/"):
-            if not include_reserved_additional_info and part in RESERVED_ADDITIONAL_INFO:
+            if re.fullmatch(ignore_parts_re, part):
+                continue
+
+            try:
+                run_accreditation = RunAccreditation(part)
+            except ValueError:
+                run_accreditation = None
+
+            if not include_run_accreditations and run_accreditation:
                 continue
 
             yield part

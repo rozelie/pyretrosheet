@@ -120,3 +120,14 @@ def test_explicit_values(raw_advance, explicit_attr, is_explicit):
     advance_ = advance.Advance.from_event_advance(raw_advance)
 
     assert getattr(advance_, explicit_attr) == is_explicit
+
+
+@pytest.mark.parametrize(
+    ["additional_info", "expected_parts"],
+    [
+        (["WP", "TH", "TH1", "PB", "THH"], []),
+        (["1", "12" "1E1"], ["1", "12" "1E1"]),
+    ]
+)
+def test__iter_additional_info_and_parts_without_run_accreditations(additional_info, expected_parts):
+    assert list(advance._iter_additional_info_and_parts(additional_info)) == expected_parts
