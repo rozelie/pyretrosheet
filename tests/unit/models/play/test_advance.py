@@ -125,9 +125,9 @@ def test_explicit_values(raw_advance, explicit_attr, is_explicit):
 @pytest.mark.parametrize(
     ["additional_info", "expected_parts"],
     [
-        (["WP", "TH", "TH1", "PB", "THH", "BR", "OBS"], []),
-        (["1", "12" "1E1"], ["1", "12" "1E1"]),
+        (["WP", "TH", "TH1", "PB", "THH", "BR", "OBS", "8-2", "5X", "BINT", "RINT", "AP", "74H", "INT"], []),
+        (["1", "12", "1E1", "8!5", "92!"], ["1", "12", "1E1", "85", "92"]),
     ],
 )
-def test__iter_additional_info_and_parts_without_run_accreditations(additional_info, expected_parts):
-    assert list(advance._iter_additional_info_and_parts(additional_info)) == expected_parts
+def test__iter_fielding_additional_info(additional_info, expected_parts):
+    assert list(advance._iter_fielding_additional_info(additional_info)) == expected_parts

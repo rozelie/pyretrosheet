@@ -69,9 +69,11 @@ def test__get_runner_event(raw_description, expected_runner_event):
         ("1(B)23(1)4(2)", BatterEvent.LINED_INTO_TRIPLE_PLAY, None, ["1", "23", "4"]),
         ("CS2(E2)", None, RunnerEvent.CAUGHT_STEALING, []),
         ("CS2(12)", None, RunnerEvent.CAUGHT_STEALING, ["12"]),
+        ("CS2(26!)", None, RunnerEvent.CAUGHT_STEALING, ["26"]),
         ("PO(E1)", None, RunnerEvent.PICKED_OFF, []),
         ("PO(1)", None, RunnerEvent.PICKED_OFF, ["1"]),
         ("POCS(E1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, []),
+        ("POCS(1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, ["1"]),
         ("POCS(1)", None, RunnerEvent.PICKED_OFF_CAUGHT_STEALING, ["1"]),
     ],
 )

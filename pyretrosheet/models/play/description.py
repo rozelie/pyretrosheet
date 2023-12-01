@@ -211,7 +211,15 @@ def _get_fielding_out_plays(
             if not re.fullmatch(r".*\(.*E.*\)", description):
                 fielding_out_plays.append(re.fullmatch(r".*\((.*)\)", description).group(1))  # type: ignore
 
-    return fielding_out_plays
+    corrected_fielding_out_plays = []
+    for play in fielding_out_plays:
+        # ! represents an exceptional play, which we can ignore here
+        corrected_part = play
+        if "!" in play:
+            corrected_part = play.replace("!", "")
+        corrected_fielding_out_plays.append(corrected_part)
+
+    return corrected_fielding_out_plays
 
 
 def _get_fielding_handler_plays(

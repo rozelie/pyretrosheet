@@ -139,7 +139,7 @@ def _get_fielder_assists(additional_info: list[str]) -> list[int]:
         additional_info: advance additional info
     """
     fielder_assists = []
-    for info in _iter_additional_info_and_parts(additional_info):
+    for info in _iter_fielding_additional_info(additional_info):
         for i, fielder_position in enumerate(info):
             if fielder_position == "E" or info[i - 1] == "E" or i == len(info) - 1:
                 continue
@@ -159,7 +159,7 @@ def _get_fielder_put_out(additional_info: list[str], is_out: bool) -> int | None
     if not is_out:
         return None
 
-    for info in _iter_additional_info_and_parts(additional_info):
+    for info in _iter_fielding_additional_info(additional_info):
         return int(info[-1])
 
     return None
@@ -176,7 +176,7 @@ def _get_fielder_handlers(additional_info: list[str], is_out: bool) -> list[int]
         return []
 
     fielder_handlers = []
-    for info in _iter_additional_info_and_parts(additional_info):
+    for info in _iter_fielding_additional_info(additional_info):
         for i, fielder_position in enumerate(info):
             if fielder_position == "E" or info[i - 1] == "E":
                 continue
@@ -197,7 +197,7 @@ def _get_fielder_errors(additional_info: list[str], is_out: bool) -> list[int]:
         return []
 
     fielder_errors = []
-    for info in _iter_additional_info_and_parts(additional_info):
+    for info in _iter_fielding_additional_info(additional_info):
         for i, fielder_position in enumerate(info):
             if fielder_position == "E":
                 fielder_errors.append(int(info[i + 1]))
@@ -205,32 +205,41 @@ def _get_fielder_errors(additional_info: list[str], is_out: bool) -> list[int]:
     return fielder_errors
 
 
-def _iter_additional_info_and_parts(
-    additional_info: list[str], include_run_accreditations: bool = False
-) -> Iterator[str]:
+def _iter_fielding_additional_info(additional_info: list[str]) -> Iterator[str]:
     """Iterate additional info and any sub-parts (delimited by '/').
 
     Args:
         additional_info: advance additional info
-        include_run_accreditations: include run accreditations additional info
     """
     # ignore parts that are not useful in fielding calculations
-    ignore_parts_re = r"(WP|TH(\d)?|PB|THH|BR|OBS)"
+    ignore_parts_re = r"(WP|TH(\d)?|PB|THH|BR|OBS|(B|R)INT|INT|AP)"
     for info in additional_info:
         for part in info.split("/"):
-            if re.fullmatch(ignore_parts_re, part):
+            corrected_part = part
+            # ! encodes an exceptional part of a play, of which we can ignore here
+            if "!" in part:
+                corrected_part = part.replace("!", "")
+
+            if re.fullmatch(ignore_parts_re, corrected_part):
                 continue
 
             # it is unclear what info like `8-2` represents
-            if re.fullmatch(r"\d-\d", part):
+            if re.fullmatch(r"\d-\d", corrected_part):
                 continue
 
+            # it is unclear what info like `5X` represents
+            if re.fullmatch(r"\dX", corrected_part):
+                continue
+
+            # it is unclear what info like `74H` represents
+            if re.fullmatch(r"\d+H", corrected_part):
+                continue
+
+            # run accreditations do not encode any fielding info
             try:
-                run_accreditation = RunAccreditation(part)
-            except ValueError:
-                run_accreditation = None
-
-            if not include_run_accreditations and run_accreditation:
+                RunAccreditation(corrected_part)
                 continue
+            except ValueError:
+                pass
 
-            yield part
+            yield corrected_part

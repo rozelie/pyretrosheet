@@ -10,6 +10,7 @@ from pyretrosheet.models.play import event
         "99/",
         "15(2)4//BG/GDP.1-2",
         "E2/TH/SH/.1-2",
+        "FC3/DP/G3S.3XH(32);1X2(8).B-1",
     ],
 )
 def test_can_parse_event(raw_event):

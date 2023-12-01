@@ -31,7 +31,12 @@ class Event:
             if event.endswith(char):
                 event = event[:-1]
 
-        if "." in event:
+        # need to handle this case specifically as to not make the rest of the logic more complex
+        # this is the only known case of multiple '.' in a play - likely an encoding error
+        if event == "FC3/DP/G3S.3XH(32);1X2(8).B-1":
+            description_and_modifiers = "FC3/DP/G3S"
+            advances = ["3XH(32)", "1X2(8)", "B-1"]
+        elif "." in event:
             description_and_modifiers, advances_raw = event.split(".")
             advances = advances_raw.split(";")
         else:

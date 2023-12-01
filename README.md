@@ -116,6 +116,7 @@ publish_to_pypi:  Publish the package to pypi.org.
     - a specific game
 - Determine top-level interface for querying data
 - Verify enriched data with alternative sources like Baseball Reference
+- Improve error handling for inability to retrieve Retrosheet data
 
 # Retrosheet Notice
 The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested
