@@ -1,5 +1,7 @@
 # pyretrosheet
 
+[![PyPI version](https://badge.fury.io/py/pyretrosheet.svg)](https://badge.fury.io/py/pyretrosheet) ![Coverage](assets/coverage.svg)
+
 > `pyretrosheet` is under active development and a formal release has not yet been made (but hopefully will be soon!).`
 
 Load, analyze, and enrich [retrosheet.org](https://www.retrosheet.org) MLB data.
@@ -16,6 +18,10 @@ data for all AL and NL seasons from 1919 to 2022).
 - downloading/using MLB data from sources other than Retrosheet
 
 # Usage
+```
+pip install pyretrosheet
+```
+
 **TODO**
 
 # Data Availability

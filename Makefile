@@ -26,6 +26,12 @@ lint:  ## Run ruff and mypy on package files.
 	${VENV_BIN}/ruff ${SRC_DIR}
 	${VENV_BIN}/mypy ${SRC_DIR}
 
+coverage:  ## Run test coverage and update coverage badge
+	${VENV_BIN}/coverage run -m pytest tests
+	${VENV_BIN}/coverage report -m
+	pip install coverage-badge
+	coverage-badge -f -o assets/coverage.svg
+
 bump_version:  ## Increment patch version references in the project
 	${PYTHON} -m pip install --upgrade bumpversion
 	bumpversion patch

@@ -21,3 +21,14 @@ jobs:
 
     - name: Run linters
       run: make lint
+
+    - name: Run coverage
+      run: make coverage
+
+    - name: Commit coverage
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git add coverage-badge.svg
+        git commit -m "Update coverage badge"
+        git push
