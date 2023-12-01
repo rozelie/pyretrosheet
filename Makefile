@@ -16,7 +16,7 @@ test:  ## Run pytest on the tests dir.
 	PYTHONPATH="${ROOT_DIR}" PYTHONUNBUFFERED=1 ${PYTHON} -m pytest ${TESTS_DIR}
 
 test_all_data:  ## Run pytest on all Retrosheet data.
-	PYRETROSHEET_TEST_ALL_DATA=true PYTHONPATH="${ROOT_DIR}" PYTHONUNBUFFERED=1 ${PYTHON} -m pytest ${TESTS_DIR} --exitfirst
+	PYRETROSHEET_TEST_ALL_DATA=true PYTHONPATH="${ROOT_DIR}" PYTHONUNBUFFERED=1 ${PYTHON} -m pytest ${TESTS_DIR} --exitfirst --capture=no
 
 format: ## Run black and isort on package and tests dirs.
 	${VENV_BIN}/black ${SRC_DIR} ${TESTS_DIR}
