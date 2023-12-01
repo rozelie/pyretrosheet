@@ -4,7 +4,7 @@
 
 > `pyretrosheet` is under active development and a formal release has not yet been made (but hopefully will be soon!).
 
-Load, analyze, and enrich [retrosheet.org](https://www.retrosheet.org) MLB data.
+Load, analyze, and enrich [retrosheet.org](https://www.retrosheet.org) MLB data into Python representations.
 
 Retrosheet provides play-by-play and other miscellaneous MLB data (at the time of writing, includes all play-by-play 
 data for all AL and NL seasons from 1919 to 2022).
@@ -16,6 +16,10 @@ data for all AL and NL seasons from 1919 to 2022).
 
 `pyretrosheet` does **not** provide functionality for:
 - downloading/using MLB data from sources other than Retrosheet
+
+See [Retrosheet Data Resources](https://www.retrosheet.org/resources/resources1.html) for other tools that parse
+Retrosheet event files. At the time of writing, these resources focus on loading/dumping to other data formats like
+CSV and SQL databases.
 
 # Usage
 ```
