@@ -38,6 +38,10 @@ class Play:
                 Examples include: 'play,7,0,saboc001,01,CX,8/F78', 'play,1,0,marts002,22,CBCBX,S9/L89S-'
             comment_lines: comment lines that reference the play, if present
         """
+        # Handle weird case of 'play,3,1,smitj106,??,,43,2-3' where I think this is an encoding error
+        if play_line == "play,3,1,smitj106,??,,43,2-3":
+            play_line = "play,3,1,smitj106,??,?,43.2-3"
+
         _, inning, team_location, batter_id, count, pitches, event = play_line.split(",")
         return cls(
             inning=int(inning),
