@@ -12,6 +12,7 @@ def test_all_data(tmp_path):
     data_dir.mkdir()
 
     for year in range(1919, 2023):
+        print(f"Testing {year=}...")
         list(pyretrosheet.load_games(year, data_dir))
 
     # passes if no exception raised
