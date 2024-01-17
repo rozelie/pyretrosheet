@@ -6,7 +6,7 @@ import pyretrosheet
 
 
 @pytest.mark.skipif(not os.getenv("PYRETROSHEET_TEST_ALL_DATA"), reason="I/O intensive and should only be run locally")
-def test_all_data(tmp_path):
+def test_all_data_loading(tmp_path):
     """Loads all Retrosheet data and confirms that all data is at the very least loadable."""
     data_dir = tmp_path / "data"
     data_dir.mkdir()
