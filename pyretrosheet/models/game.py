@@ -53,11 +53,12 @@ class Game:
         return "\n".join(lines)
 
     @classmethod
-    def from_game_lines(cls, game_lines: list[str]) -> "Game":
+    def from_game_lines(cls, game_lines: list[str], basic_info_only: bool = False) -> "Game":
         """Load a game from game lines.
 
         Args:
             game_lines: game lines from a game
+            basic_info_only: only populate basic info (game id and participating teams)
         """
         id_ = None
         info = {}
@@ -74,6 +75,10 @@ class Game:
                         info[parts[1]] = parts[2]
 
                     case "start":
+                        # start lines mark the end of the id and info lines needed for basic info
+                        if basic_info_only:
+                            break
+
                         chronological_events.append(Player.from_start_or_sub_line(line, is_sub=False))
 
                     case "sub":

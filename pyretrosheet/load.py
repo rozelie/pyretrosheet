@@ -11,13 +11,17 @@ PYRETROSHEET_DIR = Path.home() / ".pyretrosheet"
 DEFAULT_DATA_DIR = PYRETROSHEET_DIR / "data"
 
 
-def load_games(year: int, data_dir: Path | str = DEFAULT_DATA_DIR, force_download: bool = False) -> Iterator[Game]:
+def load_games(
+    year: int, data_dir: Path | str = DEFAULT_DATA_DIR, force_download: bool = False, basic_info_only: bool = False
+) -> Iterator[Game]:
     """Load Retrosheet games.
 
     Args:
         year: the year to load Retrosheet data for
         data_dir: dir where data will be stored (defaults to '~/.pyretrosheet/data')
         force_download: force a fresh download of the data even if it already exists
+        basic_info_only: only populate basic info (game id and participating teams)
+            useful for quick game discovery due to less overhead in parsing entire game data
     """
     data_dir = data_dir if isinstance(data_dir, Path) else Path(data_dir)
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -26,18 +30,19 @@ def load_games(year: int, data_dir: Path | str = DEFAULT_DATA_DIR, force_downloa
         data_dir=Path(data_dir) or DEFAULT_DATA_DIR,
         force_download=force_download,
     ):
-        yield from _iter_games_from_play_by_play_file(play_by_play_file)
+        yield from _iter_games_from_play_by_play_file(play_by_play_file, basic_info_only=basic_info_only)
 
 
-def _iter_games_from_play_by_play_file(file: Path) -> Iterator[Game]:
+def _iter_games_from_play_by_play_file(file: Path, basic_info_only: bool = False) -> Iterator[Game]:
     """Iterate games loaded from a play by play file.
 
     Args:
         file: the file path to the play by play file
+        basic_info_only: only populate basic info (game id and participating teams)
     """
     for games_lines in _iter_game_lines(file.read_text().splitlines()):
         try:
-            yield Game.from_game_lines(games_lines)
+            yield Game.from_game_lines(games_lines, basic_info_only=basic_info_only)
         except ParseError as e:
             raise ParseError(e.looking_for_value, e.raw_value, e.game_line, file.as_posix()) from e
 

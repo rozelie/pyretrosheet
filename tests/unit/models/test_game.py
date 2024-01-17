@@ -27,3 +27,14 @@ class TestGame:
             "thomm005": 0,
             "votha001": 2,
         }
+
+    def test_from_game_lines__basic_info_only(self):
+        game_lines = testing_data.WAS_2022_SINGLE_GAME_EXAMPLE.read_text().splitlines()
+
+        game_ = game.Game.from_game_lines(game_lines, basic_info_only=True)
+
+        assert game_.id.raw == "id,WAS202204070"
+        assert game_.home_team_id == "WAS"
+        assert game_.visiting_team_id == "NYN"
+        assert len(game_.chronological_events) == 0
+        assert game_.earned_runs == {}
