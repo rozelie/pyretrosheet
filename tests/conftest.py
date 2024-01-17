@@ -2,9 +2,11 @@ from copy import deepcopy
 
 import pytest
 
-from pyretrosheet.models.player import Player
+from pyretrosheet.models import game
 from pyretrosheet.models.play import Play
+from pyretrosheet.models.player import Player
 from pyretrosheet.models.team import TeamLocation
+from tests import testing_data
 
 
 @pytest.fixture
@@ -31,3 +33,9 @@ def player_2(player_1):
 @pytest.fixture
 def play_single(player_1):
     return Play.from_play_line(play_line=f"play,1,0,{player_1.id},??,X,S", comment_lines=[])
+
+
+@pytest.fixture
+def real_game():
+    game_lines = testing_data.WAS_2022_SINGLE_GAME_EXAMPLE.read_text().splitlines()
+    return game.Game.from_game_lines(game_lines)
