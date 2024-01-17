@@ -87,7 +87,7 @@ Contributions are welcome for any encodings not covered!
   - suspensions
 
 ## Enriched
-`pyretrosheet` provides an interface to enrich the data to include:
+`pyretrosheet` provides enriched Retrosheet data to provide:
 - **TODO**
 
 # Contributing
@@ -105,16 +105,41 @@ publish_to_testpypi:  Publish the package to test.pypi.org.
 publish_to_pypi:  Publish the package to pypi.org.
 ```
 ## Todo
+
+### Non-Trivial
 - ReadTheDocs
-- Parse out 'info' fields into `pyretrosheet.models.Game` properties
-- Implement versions for a release
-- Encoding pitches from `play` data
-- Implement index of game files to easily lookup games for:
-    - a specific team within a year
-    - a specific game
-- Determine top-level interface for querying data
 - Verify enriched data with alternative sources like Baseball Reference
+- Determine top-level interface for querying data
+- Implement index of game files to easily lookup games for:
+  - a specific team within a year
+  - a specific game
+- Stats
+  - Hits (H)
+  - Walks (W)
+  - Hit By Pitches (HBP)
+  - Sacrifice Flys (SF)
+  - At Bats (AB)
+  - Singles (S)
+  - Doubles (D)
+  - Triples (T)
+  - Home Runs (HR)
+  - Composite
+    - Batting Average (BA)
+    - Slugging Percentage (SP)
+    - On Base Percentage (OBP)
+  - Difficult and Needs Lots of Validation
+    - Runs (R)
+    - Runs Batted In (RBI)
+- Aggregate stats
+  - Mean, Median, Std. Dev, Min, Max
+
+### Trivial
+- Parse out 'info' fields into `pyretrosheet.models.Game` properties
+- Encoding pitches from `play` data
 - Improve error handling for inability to retrieve Retrosheet data
+- Improve README Usage examples
+- Add CONTRIBUTING.md
+- Add interface to load stats
 
 # Retrosheet Notice
 The information used here was obtained free of charge from and is copyrighted by Retrosheet. Interested
