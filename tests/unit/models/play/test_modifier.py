@@ -52,15 +52,17 @@ from pyretrosheet.models.play.modifier import ModifierType
         ("UINT", ModifierType.UMPIRE_INTERFERENCE),
         ("UREV", ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD),
         ("78", ModifierType.HIT_LOCATION),
-        ("THH", ModifierType.UNKNOWN),
+        ("B", ModifierType.UNKNOWN),
         ("BF", ModifierType.UNKNOWN),
+        ("BFDP", ModifierType.UNKNOWN),
+        ("THH", ModifierType.UNKNOWN),
+        ("B4S", ModifierType.UNKNOWN),
     ],
 )
 def test__get_modifier_type(raw_modifier, expected_modifier_type):
     assert modifier._get_modifier_type(raw_modifier) == expected_modifier_type
 
 
-# L89S
 @pytest.mark.parametrize(
     ["raw_modifier", "modifier_type", "expected_hit_location"],
     [

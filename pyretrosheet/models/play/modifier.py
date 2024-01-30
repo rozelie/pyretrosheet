@@ -6,6 +6,7 @@ from enum import Enum, auto
 
 from pyretrosheet.models.base import Base
 from pyretrosheet.models.exceptions import ParseError
+from pyretrosheet.models.play.ignored import trim_ignored_characters
 
 
 class ModifierType(Enum):
@@ -83,12 +84,13 @@ class Modifier:
         Args:
             modifier: a modifier part of a play's event
         """
-        modifier_type = _get_modifier_type(modifier)
+        trimmed_modifier = trim_ignored_characters(modifier)
+        modifier_type = _get_modifier_type(trimmed_modifier)
         return cls(
             type=modifier_type,
-            hit_location=_get_hit_location(modifier, modifier_type),
-            fielder_positions=_get_fielder_positions(modifier, modifier_type),
-            base=_get_base(modifier, modifier_type),
+            hit_location=_get_hit_location(trimmed_modifier, modifier_type),
+            fielder_positions=_get_fielder_positions(trimmed_modifier, modifier_type),
+            base=_get_base(trimmed_modifier, modifier_type),
             raw=modifier,
         )
 
@@ -145,9 +147,14 @@ def _get_modifier_type(modifier: str) -> ModifierType:
         r"UINT(\d+.*)?": ModifierType.UMPIRE_INTERFERENCE,
         r"UREV(\d+.*)?": ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD,
         r"\d+.*": ModifierType.HIT_LOCATION,
-        r"THH": ModifierType.UNKNOWN,
+        # Unable to find these modifiers defined in the Retrosheet spec
+        r"B": ModifierType.UNKNOWN,
         r"BF": ModifierType.UNKNOWN,
+        r"BFDP": ModifierType.UNKNOWN,
+        r"THH": ModifierType.UNKNOWN,
+        r"B\dS": ModifierType.UNKNOWN,
     }
+
     for pattern, modifier_type in pattern_to_modifier_type.items():
         if re.fullmatch(pattern, modifier):
             return modifier_type
