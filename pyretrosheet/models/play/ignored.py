@@ -4,6 +4,9 @@
 def trim_ignored_characters(play_or_modifier: str) -> str:
     """Trim ignored characters from play data.
 
+    Args:
+        play_or_modifier: a raw Retrosheet play or modifier
+
     From Retrosheet event file description:
         A play record ending in a number sign, #, indicates that there is some uncertainty in the play.
         Occasionally, a com record may follow providing additional information.
