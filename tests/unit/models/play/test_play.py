@@ -19,7 +19,6 @@ def test_can_parse_play_line(raw_play_line):
     # passes if no exception raised
 
 
-### Regressions tests caused by bad regex ###
 def test_parses_single():
     raw_play_line = "play,8,0,reyef001,12,CSBX,S8/L89D+"
 
