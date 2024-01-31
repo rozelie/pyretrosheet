@@ -109,11 +109,16 @@ class ModifierType(Enum):
     UMPIRE_INTERFERENCE = auto()
     UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD = auto()
     HIT_LOCATION = auto()
-    UNKNOWN = auto()
-    # A play defined as 'K' (strikeout) is frequently followed by 'S' and 'BF' but I am unable
-    # to see who they are defined in the Retrosheet spec.
-    STRIKEOUT_S = auto()
-    STRIKEOUT_BF = auto()
+    # Unsure what these modifiers encode, but they appear frequently enough to define
+    B = auto()
+    BF = auto()
+    BFDP = auto()
+    U = auto()
+    S = auto()
+    RR = auto()
+    # These may be typos and the intention was to encode these as their capital letter
+    p = auto()
+    l = auto()
 
 
 @dataclass
@@ -135,15 +140,14 @@ class Modifier:
     raw: str
 
     @classmethod
-    def from_event_modifier(cls, modifier: str, description: Description) -> "Modifier":
+    def from_event_modifier(cls, modifier: str) -> "Modifier":
         """Load a modifier from the modifier part of a play's event.
 
         Args:
             modifier: a modifier part of a play's event
-            description: the play's parsed description
         """
         trimmed_modifier = trim_ignored_characters(modifier)
-        modifier_type = _get_modifier_type(trimmed_modifier, description)
+        modifier_type = _get_modifier_type(trimmed_modifier)
         return cls(
             type=modifier_type,
             hit_location=_get_hit_location(trimmed_modifier, modifier_type),
@@ -153,12 +157,11 @@ class Modifier:
         )
 
 
-def _get_modifier_type(modifier: str, description: Description) -> ModifierType:
+def _get_modifier_type(modifier: str) -> ModifierType:
     """Get the modifier type via the raw the modifier.
 
     Args:
         modifier: a modifier part of a play's event
-        description: the description part of a play's event
     """
     # Handle odd case from play in 2004CHA.EVA: 'play,8,0,blakc001,20,BBX,8/!F'
     if modifier == "!F":
@@ -167,12 +170,6 @@ def _get_modifier_type(modifier: str, description: Description) -> ModifierType:
     # Handle odd case from play in 2011TEX.EVA: 'play,8,0,swisn001,12,BFCX,5/P!5F'
     if modifier == "P!5F":
         return ModifierType.POP_FLY
-
-    if description.batter_event == BatterEvent.STRIKEOUT:
-        if modifier == "S":
-            return ModifierType.STRIKEOUT_S
-        elif modifier == "BF":
-            return ModifierType.STRIKEOUT_BF
 
     # (\d+.*)? matches hit location which is an optional amount of digits followed by an optional amount
     # of alphabetic characters
@@ -216,24 +213,22 @@ def _get_modifier_type(modifier: str, description: Description) -> ModifierType:
         r"RINT(\d+.*)?": ModifierType.RUNNER_INTERFERENCE,
         r"SF(\d+.*)?": ModifierType.SACRIFICE_FLY,
         r"SH(\d+.*)?": ModifierType.SACRIFICE_HIT_BUNT,
-        r"TH(\d)?(\d+.*)?": ModifierType.THROW,
+        r"TH(\d)?(\d+.*)?(H)?": ModifierType.THROW,
         r"TP(\d+.*)?": ModifierType.UNSPECIFIED_TRIPLE_PLAY,
         r"UINT(\d+.*)?": ModifierType.UMPIRE_INTERFERENCE,
         r"UREV(\d+.*)?": ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD,
         r"\d+.*": ModifierType.HIT_LOCATION,
-        # Unable to find these modifiers defined in the Retrosheet spec
-        r"B": ModifierType.UNKNOWN,
-        r"BF": ModifierType.UNKNOWN,
-        r"BFDP": ModifierType.UNKNOWN,
-        r"THH": ModifierType.UNKNOWN,
-        r"B\d+([SRLFM]+)?": ModifierType.UNKNOWN,
-        r"p": ModifierType.UNKNOWN,
-        r"U": ModifierType.UNKNOWN,
-        r"U\d": ModifierType.UNKNOWN,
-        r"S": ModifierType.UNKNOWN,
-        r"l": ModifierType.UNKNOWN,
-        r"U\d.*": ModifierType.UNKNOWN,
-        r"RR.*": ModifierType.UNKNOWN,
+        # Not defined in Retrosheet, but appears frequently enough to define
+        r"B": ModifierType.B,
+        r"B\d+.*": ModifierType.B,
+        r"BF": ModifierType.BF,
+        r"BFDP": ModifierType.BFDP,
+        r"U": ModifierType.U,
+        r"U\d.*": ModifierType.U,
+        r"S": ModifierType.S,
+        r"RR.*": ModifierType.RR,
+        r"p": ModifierType.p,
+        r"l": ModifierType.l,
     }
     for pattern, modifier_type in pattern_to_modifier_type.items():
         if re.fullmatch(pattern, modifier):
@@ -306,7 +301,7 @@ def _get_base(modifier: str, modifier_type: ModifierType) -> Base | None:
         modifier_type: the type of modifier
     """
     if modifier_type == ModifierType.THROW:  # noqa: SIM102
-        if match := re.fullmatch(r"TH(\d)", modifier):
+        if match := re.fullmatch(r"TH(\d|H)", modifier):
             return Base(match.group(1))
 
     return None

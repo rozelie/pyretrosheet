@@ -2,7 +2,6 @@ import pytest
 
 from pyretrosheet.models.base import Base
 from pyretrosheet.models.play import modifier
-from pyretrosheet.models.play.description import Description
 from pyretrosheet.models.play.modifier import ModifierType
 
 
@@ -54,39 +53,36 @@ from pyretrosheet.models.play.modifier import ModifierType
         ("SH", ModifierType.SACRIFICE_HIT_BUNT),
         ("TH", ModifierType.THROW),
         ("TH1", ModifierType.THROW),
+        ("THH", ModifierType.THROW),
         ("TP", ModifierType.UNSPECIFIED_TRIPLE_PLAY),
         ("UINT", ModifierType.UMPIRE_INTERFERENCE),
         ("UREV", ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD),
         ("78", ModifierType.HIT_LOCATION),
-        ("B", ModifierType.UNKNOWN),
-        ("BFDP", ModifierType.UNKNOWN),
-        ("THH", ModifierType.UNKNOWN),
-        ("B4S", ModifierType.UNKNOWN),
-        ("B34S", ModifierType.UNKNOWN),
-        ("B2R", ModifierType.UNKNOWN),
-        ("B25", ModifierType.UNKNOWN),
-        ("B2L", ModifierType.UNKNOWN),
-        ("B23F", ModifierType.UNKNOWN),
-        ("B2RF", ModifierType.UNKNOWN),
-        ("B6MS", ModifierType.UNKNOWN),
-        ("p", ModifierType.UNKNOWN),
-        ("U", ModifierType.UNKNOWN),
-        ("U1", ModifierType.UNKNOWN),
-        ("l", ModifierType.UNKNOWN),
-        ("U9R4", ModifierType.UNKNOWN),
-        ("U4R6", ModifierType.UNKNOWN),
-        ("U4R6", ModifierType.UNKNOWN),
-        ("U7R64", ModifierType.UNKNOWN),
-        ("U85", ModifierType.UNKNOWN),
-        ("U6R5U1", ModifierType.UNKNOWN),
-        ("RR6", ModifierType.UNKNOWN),
+        ("BF", ModifierType.BF),
+        ("B", ModifierType.B),
+        ("BFDP", ModifierType.BFDP),
+        ("B4S", ModifierType.B),
+        ("B34S", ModifierType.B),
+        ("B2R", ModifierType.B),
+        ("B25", ModifierType.B),
+        ("B2L", ModifierType.B),
+        ("B23F", ModifierType.B),
+        ("B2RF", ModifierType.B),
+        ("B6MS", ModifierType.B),
+        ("p", ModifierType.p),
+        ("U", ModifierType.U),
+        ("U1", ModifierType.U),
+        ("l", ModifierType.l),
+        ("U9R4", ModifierType.U),
+        ("U4R6", ModifierType.U),
+        ("U4R6", ModifierType.U),
+        ("U7R64", ModifierType.U),
+        ("U6R5U1", ModifierType.U),
+        ("RR6", ModifierType.RR),
     ],
 )
 def test__get_modifier_type(raw_modifier, expected_modifier_type):
-    # description should not matter here - we just need to pass one
-    description = Description.from_event_description("S1")
-
-    assert modifier._get_modifier_type(raw_modifier, description) == expected_modifier_type
+    assert modifier._get_modifier_type(raw_modifier) == expected_modifier_type
 
 
 @pytest.mark.parametrize(

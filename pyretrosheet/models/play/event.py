@@ -60,10 +60,9 @@ class Event:
         except AttributeError as e:
             raise ParseError("description_and_modifiers", event_trimmed) from e
 
-        parsed_description = Description.from_event_description(description)
         return cls(
-            description=parsed_description,
-            modifiers=[Modifier.from_event_modifier(m, parsed_description) for m in modifiers],
+            description=Description.from_event_description(description),
+            modifiers=[Modifier.from_event_modifier(m) for m in modifiers],
             advances=[Advance.from_event_advance(a) for a in advances],
             raw=event,
         )
