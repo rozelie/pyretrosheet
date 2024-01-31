@@ -6,6 +6,7 @@ from enum import Enum, auto
 
 from pyretrosheet.models.base import Base
 from pyretrosheet.models.exceptions import ParseError
+from pyretrosheet.models.play.description import BatterEvent, Description
 from pyretrosheet.models.play.ignored import trim_ignored_characters
 
 
@@ -109,6 +110,10 @@ class ModifierType(Enum):
     UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD = auto()
     HIT_LOCATION = auto()
     UNKNOWN = auto()
+    # A play defined as 'K' (strikeout) is frequently followed by 'S' and 'BF' but I am unable
+    # to see who they are defined in the Retrosheet spec.
+    STRIKEOUT_S = auto()
+    STRIKEOUT_BF = auto()
 
 
 @dataclass
@@ -130,14 +135,15 @@ class Modifier:
     raw: str
 
     @classmethod
-    def from_event_modifier(cls, modifier: str) -> "Modifier":
+    def from_event_modifier(cls, modifier: str, description: Description) -> "Modifier":
         """Load a modifier from the modifier part of a play's event.
 
         Args:
             modifier: a modifier part of a play's event
+            description: the play's parsed description
         """
         trimmed_modifier = trim_ignored_characters(modifier)
-        modifier_type = _get_modifier_type(trimmed_modifier)
+        modifier_type = _get_modifier_type(trimmed_modifier, description)
         return cls(
             type=modifier_type,
             hit_location=_get_hit_location(trimmed_modifier, modifier_type),
@@ -147,12 +153,27 @@ class Modifier:
         )
 
 
-def _get_modifier_type(modifier: str) -> ModifierType:
+def _get_modifier_type(modifier: str, description: Description) -> ModifierType:
     """Get the modifier type via the raw the modifier.
 
     Args:
         modifier: a modifier part of a play's event
+        description: the description part of a play's event
     """
+    # Handle odd case from play in 2004CHA.EVA: 'play,8,0,blakc001,20,BBX,8/!F'
+    if modifier == "!F":
+        return ModifierType.FLY
+
+    # Handle odd case from play in 2011TEX.EVA: 'play,8,0,swisn001,12,BFCX,5/P!5F'
+    if modifier == "P!5F":
+        return ModifierType.POP_FLY
+
+    if description.batter_event == BatterEvent.STRIKEOUT:
+        if modifier == "S":
+            return ModifierType.STRIKEOUT_S
+        elif modifier == "BF":
+            return ModifierType.STRIKEOUT_BF
+
     # (\d+.*)? matches hit location which is an optional amount of digits followed by an optional amount
     # of alphabetic characters
     pattern_to_modifier_type = {
@@ -190,7 +211,8 @@ def _get_modifier_type(modifier: str) -> ModifierType:
         r"OBS(\d+.*)?": ModifierType.OBSTRUCTION,
         r"P(\d+.*)?": ModifierType.POP_FLY,
         r"PASS(\d+.*)?": ModifierType.RUNNER_PASSED,
-        r"R\d(\d+.*)?(U\d)?": ModifierType.RELAY_THROW,
+        r"R\d.*": ModifierType.RELAY_THROW,
+        r"R": ModifierType.RELAY_THROW,
         r"RINT(\d+.*)?": ModifierType.RUNNER_INTERFERENCE,
         r"SF(\d+.*)?": ModifierType.SACRIFICE_FLY,
         r"SH(\d+.*)?": ModifierType.SACRIFICE_HIT_BUNT,
@@ -210,7 +232,8 @@ def _get_modifier_type(modifier: str) -> ModifierType:
         r"U\d": ModifierType.UNKNOWN,
         r"S": ModifierType.UNKNOWN,
         r"l": ModifierType.UNKNOWN,
-        r"U9R4": ModifierType.UNKNOWN,
+        r"U\d.*": ModifierType.UNKNOWN,
+        r"RR.*": ModifierType.UNKNOWN,
     }
     for pattern, modifier_type in pattern_to_modifier_type.items():
         if re.fullmatch(pattern, modifier):
@@ -248,14 +271,29 @@ def _get_fielder_positions(modifier: str, modifier_type: ModifierType) -> list[i
         modifier_type: the type of modifier
     """
     if modifier_type in [ModifierType.ERROR, ModifierType.RELAY_THROW]:
-        # there are relay throws encoded like 'R6U5' where it is unclear what the 'U' represents and it's following number
-        if re.fullmatch(r"R(\d+)U\d", modifier):
-            modifier = modifier[:-2]
+        # handle rare-case of RELAY_THROW modifier without fielding positions specified
+        if modifier == "R":
+            return []
 
         try:
-            return [int(p) for p in re.fullmatch(r"[ER](\d+)", modifier).group(1)]  # type: ignore
+            # From Retrosheet Spec: 'U appearing in a fielding sequence indicates the fielder handling the ball is unknown'
+            # We encode unknown as fielder postiion 0.
+            fielder_positions = []
+            for position in re.fullmatch(r"[ER](.*)", modifier).group(1):  # type: ignore
+                if position == "U":
+                    fielder_positions.append(0)
+                elif position == "R":
+                    # cases like 'R4U8R5' exist and it is unclear what 'R' represents
+                    continue
+                elif position == "(":
+                    # ignore metadata in parenthesis, e.g. 'R3(TH)'
+                    break
+                else:
+                    fielder_positions.append(int(position))
         except AttributeError as e:
             raise ParseError("fielder_position", raw_value=modifier) from e
+        else:
+            return fielder_positions
 
     return []
 

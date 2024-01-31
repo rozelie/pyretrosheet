@@ -2,6 +2,7 @@ import pytest
 
 from pyretrosheet.models.base import Base
 from pyretrosheet.models.play import modifier
+from pyretrosheet.models.play.description import Description
 from pyretrosheet.models.play.modifier import ModifierType
 
 
@@ -24,6 +25,7 @@ from pyretrosheet.models.play.modifier import ModifierType
         ("DP", ModifierType.UNSPECIFIED_DOUBLE_PLAY),
         ("E1", ModifierType.ERROR),
         ("F", ModifierType.FLY),
+        ("!F", ModifierType.FLY),
         ("FDP", ModifierType.FLY_BALL_DOUBLE_PLAY),
         ("FINT", ModifierType.FAN_INTERFERENCE),
         ("FL", ModifierType.FOUL),
@@ -41,8 +43,12 @@ from pyretrosheet.models.play.modifier import ModifierType
         ("NDP", ModifierType.NO_DOUBLE_PLAY_CREDITED_FOR_THIS_PLAY),
         ("OBS", ModifierType.OBSTRUCTION),
         ("P", ModifierType.POP_FLY),
+        ("P!5F", ModifierType.POP_FLY),
         ("PASS", ModifierType.RUNNER_PASSED),
         ("R1", ModifierType.RELAY_THROW),
+        ("R", ModifierType.RELAY_THROW),
+        ("R4U8R5", ModifierType.RELAY_THROW),
+        ("R3BU4", ModifierType.RELAY_THROW),
         ("RINT", ModifierType.RUNNER_INTERFERENCE),
         ("SF", ModifierType.SACRIFICE_FLY),
         ("SH", ModifierType.SACRIFICE_HIT_BUNT),
@@ -53,7 +59,6 @@ from pyretrosheet.models.play.modifier import ModifierType
         ("UREV", ModifierType.UMPIRE_REVIEW_OF_CALL_ON_THE_FIELD),
         ("78", ModifierType.HIT_LOCATION),
         ("B", ModifierType.UNKNOWN),
-        ("BF", ModifierType.UNKNOWN),
         ("BFDP", ModifierType.UNKNOWN),
         ("THH", ModifierType.UNKNOWN),
         ("B4S", ModifierType.UNKNOWN),
@@ -66,14 +71,22 @@ from pyretrosheet.models.play.modifier import ModifierType
         ("B6MS", ModifierType.UNKNOWN),
         ("p", ModifierType.UNKNOWN),
         ("U", ModifierType.UNKNOWN),
-        ("S", ModifierType.UNKNOWN),
         ("U1", ModifierType.UNKNOWN),
         ("l", ModifierType.UNKNOWN),
         ("U9R4", ModifierType.UNKNOWN),
+        ("U4R6", ModifierType.UNKNOWN),
+        ("U4R6", ModifierType.UNKNOWN),
+        ("U7R64", ModifierType.UNKNOWN),
+        ("U85", ModifierType.UNKNOWN),
+        ("U6R5U1", ModifierType.UNKNOWN),
+        ("RR6", ModifierType.UNKNOWN),
     ],
 )
 def test__get_modifier_type(raw_modifier, expected_modifier_type):
-    assert modifier._get_modifier_type(raw_modifier) == expected_modifier_type
+    # description should not matter here - we just need to pass one
+    description = Description.from_event_description("S1")
+
+    assert modifier._get_modifier_type(raw_modifier, description) == expected_modifier_type
 
 
 @pytest.mark.parametrize(
