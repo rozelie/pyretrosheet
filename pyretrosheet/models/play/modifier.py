@@ -10,7 +10,59 @@ from pyretrosheet.models.play.ignored import trim_ignored_characters
 
 
 class ModifierType(Enum):
-    """Play modifier type, as defined in Retrosheet spec."""
+    """Play modifier type, as defined in the Retrosheet spec.
+
+    Retrosheet Spec:
+
+    Play modifiers and explanations
+        Each modifier is preceded by / in a play record.
+        As always, % indicates one the four bases and $ indicates a fielder.
+
+        AP    appeal play
+        BP    pop up bunt
+        BG    ground ball bunt
+        BGDP  bunt grounded into double play
+        BINT  batter interference
+        BL    line drive bunt
+        BOOT  batting out of turn
+        BP    bunt pop up
+        BPDP  bunt popped into double play
+        BR    runner hit by batted ball
+        C     called third strike
+        COUB  courtesy batter
+        COUF  courtesy fielder
+        COUR  courtesy runner
+        DP    unspecified double play
+        E$    error on $
+        F     fly
+        FDP   fly ball double play
+        FINT  fan interference
+        FL    foul
+        FO    force out
+        G     ground ball
+        GDP   ground ball double play
+        GTP   ground ball triple play
+        IF    infield fly rule
+        INT   interference
+        IPHR  inside the park home run
+        L     line drive
+        LDP   lined into double play
+        LTP   lined into triple play
+        MREV  manager challenge of call on the field
+        NDP   no double play credited for this play
+        OBS   obstruction (fielder obstructing a runner)
+        P     pop fly
+        PASS  a runner passed another runner and was called out
+        R$    relay throw from the initial fielder to $ with no out made
+        RINT  runner interference
+        SF    sacrifice fly
+        SH    sacrifice hit (bunt)
+        TH    throw
+        TH%   throw to base %
+        TP    unspecified triple play
+        UINT  umpire interference
+        UREV  umpire review of call on the field
+    """
 
     APPEAL_PLAY = auto()
     POP_UP_BUNT = auto()
@@ -138,7 +190,7 @@ def _get_modifier_type(modifier: str) -> ModifierType:
         r"OBS(\d+.*)?": ModifierType.OBSTRUCTION,
         r"P(\d+.*)?": ModifierType.POP_FLY,
         r"PASS(\d+.*)?": ModifierType.RUNNER_PASSED,
-        r"R\d(\d+.*)?": ModifierType.RELAY_THROW,
+        r"R\d(\d+.*)?(U\d)?": ModifierType.RELAY_THROW,
         r"RINT(\d+.*)?": ModifierType.RUNNER_INTERFERENCE,
         r"SF(\d+.*)?": ModifierType.SACRIFICE_FLY,
         r"SH(\d+.*)?": ModifierType.SACRIFICE_HIT_BUNT,
@@ -152,9 +204,14 @@ def _get_modifier_type(modifier: str) -> ModifierType:
         r"BF": ModifierType.UNKNOWN,
         r"BFDP": ModifierType.UNKNOWN,
         r"THH": ModifierType.UNKNOWN,
-        r"B\dS": ModifierType.UNKNOWN,
+        r"B\d+([SRLFM]+)?": ModifierType.UNKNOWN,
+        r"p": ModifierType.UNKNOWN,
+        r"U": ModifierType.UNKNOWN,
+        r"U\d": ModifierType.UNKNOWN,
+        r"S": ModifierType.UNKNOWN,
+        r"l": ModifierType.UNKNOWN,
+        r"U9R4": ModifierType.UNKNOWN,
     }
-
     for pattern, modifier_type in pattern_to_modifier_type.items():
         if re.fullmatch(pattern, modifier):
             return modifier_type
@@ -191,7 +248,14 @@ def _get_fielder_positions(modifier: str, modifier_type: ModifierType) -> list[i
         modifier_type: the type of modifier
     """
     if modifier_type in [ModifierType.ERROR, ModifierType.RELAY_THROW]:
-        return [int(p) for p in re.fullmatch(r"[ER](\d+)", modifier).group(1)]  # type: ignore
+        # there are relay throws encoded like 'R6U5' where it is unclear what the 'U' represents and it's following number
+        if re.fullmatch(r"R(\d+)U\d", modifier):
+            modifier = modifier[:-2]
+
+        try:
+            return [int(p) for p in re.fullmatch(r"[ER](\d+)", modifier).group(1)]  # type: ignore
+        except AttributeError as e:
+            raise ParseError("fielder_position", raw_value=modifier) from e
 
     return []
 
