@@ -10,8 +10,11 @@ def test_all_data_loading(tmp_path):
     """Loads all Retrosheet data and confirms that all data is at the very least loadable."""
     data_dir = tmp_path / "data"
     data_dir.mkdir()
+    start_year = 1919
+    end_year = 2022
 
-    for year in range(1919, 2023):
+    print(f"\nTesting all data from {start_year=} to {end_year=}")
+    for year in range(start_year, end_year + 1):
         print(f"Testing {year=}...")
         list(pyretrosheet.load_games(year, data_dir))
 
