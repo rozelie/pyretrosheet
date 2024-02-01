@@ -1,7 +1,6 @@
 import pytest
 
 from pyretrosheet.models import play
-from pyretrosheet.models.base import Base
 from pyretrosheet.models.play.description import BatterEvent
 from pyretrosheet.models.play.modifier import ModifierType
 

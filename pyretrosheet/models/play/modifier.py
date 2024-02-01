@@ -6,7 +6,6 @@ from enum import Enum, auto
 
 from pyretrosheet.models.base import Base
 from pyretrosheet.models.exceptions import ParseError
-from pyretrosheet.models.play.description import BatterEvent, Description
 from pyretrosheet.models.play.ignored import trim_ignored_characters
 
 
@@ -173,6 +172,7 @@ def _get_modifier_type(modifier: str) -> ModifierType:
 
     # (\d+.*)? matches hit location which is an optional amount of digits followed by an optional amount
     # of alphabetic characters
+    # @TODO: move these to the enum - a tuple of regecies?
     pattern_to_modifier_type = {
         r"AP(\d+.*)?": ModifierType.APPEAL_PLAY,
         r"BP(\d+.*)?": ModifierType.POP_UP_BUNT,
@@ -271,21 +271,26 @@ def _get_fielder_positions(modifier: str, modifier_type: ModifierType) -> list[i
             return []
 
         try:
-            # From Retrosheet Spec: 'U appearing in a fielding sequence indicates the fielder handling the ball is unknown'
+            # From Retrosheet Spec: 'U' appearing in a fielding sequence indicates the fielder handling the ball is unknown'
             # We encode unknown as fielder postiion 0.
             fielder_positions = []
             for position in re.fullmatch(r"[ER](.*)", modifier).group(1):  # type: ignore
                 if position == "U":
                     fielder_positions.append(0)
-                elif position == "R":
-                    # cases like 'R4U8R5' exist and it is unclear what 'R' represents
+                elif position in ["S", "R", "B", "M", "D", "N"]:
+                    # idk what these positions are supposed to be ¯\_(ツ)_/¯
+                    # 1997CHN.EVN: 'play,7,0,mondr002,10,BX,S8/G6M/R6S.1-2'
+                    # 1996LAN.EVN: 'play,8,0,goodc001,22,.CCBB1X,S6/BG/6MS/R3BU4.1-3(E6/TH);B-2'
+                    # 1996COL.EVN: 'play,3,0,burkj001,10,BX,S98/R89M'
+                    # 1996SDN.EVN: 'play,11,0,dunss001,10,BX,8/R8RD'
+                    # 1996TOR.EVA: 'play,7,1,grees001,00,X,36(1)/FO/G3/R36N'
                     continue
                 elif position == "(":
                     # ignore metadata in parenthesis, e.g. 'R3(TH)'
                     break
                 else:
                     fielder_positions.append(int(position))
-        except AttributeError as e:
+        except (AttributeError, ValueError) as e:
             raise ParseError("fielder_position", raw_value=modifier) from e
         else:
             return fielder_positions

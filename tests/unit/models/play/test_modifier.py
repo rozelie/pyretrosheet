@@ -110,6 +110,11 @@ def test__get_hit_location(raw_modifier, modifier_type, expected_hit_location):
         ("E1", ModifierType.ERROR, [1]),
         ("R1", ModifierType.RELAY_THROW, [1]),
         ("R25", ModifierType.RELAY_THROW, [2, 5]),
+        ("R25", ModifierType.RELAY_THROW, [2, 5]),
+        ("R6S", ModifierType.RELAY_THROW, [6]),
+        ("R3BU4", ModifierType.RELAY_THROW, [3, 0, 4]),
+        ("R89M", ModifierType.RELAY_THROW, [8, 9]),
+        ("R8RD", ModifierType.RELAY_THROW, [8]),
     ],
 )
 def test__get_fielder_positions(raw_modifier, modifier_type, expected_fielder_position):
