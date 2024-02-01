@@ -41,3 +41,11 @@ def test_parses_fielder_positions_from_relay_throw(raw_play_line, modifier_idx, 
 
     assert modifier.type == ModifierType.RELAY_THROW
     assert modifier.fielder_positions == expected_fielder_positions
+
+
+def test_is_an_at_bat__true_for_single():
+    raw_play_line = "play,1,1,johnl001,01,CX,S"
+
+    play_ = play.Play.from_play_line(raw_play_line, [])
+
+    assert play_.is_an_at_bat() is True
