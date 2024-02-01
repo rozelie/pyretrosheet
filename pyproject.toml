@@ -33,6 +33,7 @@ dev = [
   "requests-mock==1.11.0",
   "pytest-mock==3.12.0",
   "coverage==7.3.2",
+  "pytest-xdist==3.5.0",
 ]
 
 [project.urls]
@@ -54,6 +55,7 @@ select = [
     "PL", # Pylint
     "TRY", # tryceratops
     "RUF", # Ruff-specific rules
+    "F401", # unused-import
 ]
 ignore = [
     "D107", # Missing docstring in `__init__`
@@ -93,7 +95,7 @@ indent = 4
 color_output = true
 
 [tool.mypy]
-python_version = 3.11
+python_version = "3.11"
 pretty = true
 show_traceback = true
 color_output = true

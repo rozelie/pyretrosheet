@@ -13,10 +13,10 @@ setup: ## Install the package and dev dependencies into a virtualenv.
 	${PYTHON} -m pip install .[dev]
 
 test:  ## Run pytest on the tests dir.
-	PYTHONPATH="${ROOT_DIR}" PYTHONUNBUFFERED=1 ${PYTHON} -m pytest ${TESTS_DIR}
+	PYTHONPATH="${ROOT_DIR}" PYTHONUNBUFFERED=1 ${PYTHON} -m pytest ${TESTS_DIR} --numprocesses auto
 
 test_all_data:  ## Run pytest on all Retrosheet data.
-	PYRETROSHEET_TEST_ALL_DATA=true PYTHONPATH="${ROOT_DIR}" PYTHONUNBUFFERED=1 ${PYTHON} -m pytest ${TESTS_DIR} --exitfirst --capture=no
+	PYRETROSHEET_TEST_ALL_DATA=true PYTHONPATH="${ROOT_DIR}" PYTHONUNBUFFERED=1 ${PYTHON} -m pytest ${TESTS_DIR} --exitfirst --capture=no --numprocesses auto
 
 format: ## Run black and isort on package and tests dirs.
 	${VENV_BIN}/black ${SRC_DIR} ${TESTS_DIR}
