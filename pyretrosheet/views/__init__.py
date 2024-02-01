@@ -75,3 +75,32 @@ def get_inning_plays(
     for play in get_plays(game, include_home_team=include_home_team, include_visiting_team=include_visiting_team):
         inning_plays[play.inning].append(play)
     return dict(inning_plays)
+
+
+def get_team_players(games: list[Game], team_id: str) -> list[Player]:
+    """Get the players for a given team among a list of games.
+
+    Args:
+        games: games to get players from
+        team_id: the retrosheet team id
+    """
+    players = []
+    seen_player_ids = set()
+    for game in games:
+        if game.home_team_id == team_id:
+            include_home_team = True
+            include_visiting_team = False
+        elif game.visiting_team_id == team_id:
+            include_home_team = False
+            include_visiting_team = True
+        else:
+            raise ValueError(f"Could not find {team_id} in game={game.id.raw}")  # noqa: TRY003
+
+        for player in get_players(
+            game, include_home_team=include_home_team, include_visiting_team=include_visiting_team
+        ):
+            if player.id not in seen_player_ids:
+                players.append(player)
+                seen_player_ids.add(player.id)
+
+    return players

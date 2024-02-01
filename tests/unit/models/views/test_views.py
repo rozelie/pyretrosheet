@@ -1,4 +1,5 @@
 from pyretrosheet import views
+from pyretrosheet.models.player import Player
 
 MODULE_PATH = "pyretrosheet.views"
 
@@ -44,3 +45,14 @@ def test_get_inning_plays(real_game):
     assert len(home_inning_plays[1]) == 3
     assert len(visiting_inning_plays) == 9
     assert len(visiting_inning_plays[1]) == 5
+
+
+def test_team_players(real_game):
+    games = [real_game]
+    team_id = "WAS"
+
+    team_players = views.get_team_players(games, team_id)
+
+    assert len(team_players) == 15
+    for player in team_players:
+        assert isinstance(player, Player)
