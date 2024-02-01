@@ -38,3 +38,10 @@ class TestGame:
         assert game_.visiting_team_id == "NYN"
         assert len(game_.chronological_events) == 0
         assert game_.earned_runs == {}
+
+    def test_pretty_id(self):
+        game_lines = testing_data.WAS_2022_SINGLE_GAME_EXAMPLE.read_text().splitlines()
+
+        game_ = game.Game.from_game_lines(game_lines, basic_info_only=True)
+
+        assert game_.pretty_id == "2022/04/07 NYN @ WAS"

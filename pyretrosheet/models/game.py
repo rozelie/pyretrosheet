@@ -115,6 +115,11 @@ class Game:
         """The id of the visiting team."""
         return self.info["visteam"]
 
+    @property
+    def pretty_id(self) -> str:
+        """Simple, human-readable identifier for the game."""
+        return f"{self.id.date.strftime('%Y/%m/%d')} {self.visiting_team_id} @ {self.home_team_id}"
+
 
 def _yield_comment_lines_following_play(play_line_number: int, game_lines: list[str]) -> Iterator[str]:
     """Yield all comment lines that follow a play line."""
