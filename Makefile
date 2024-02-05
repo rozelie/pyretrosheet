@@ -43,6 +43,8 @@ publish_to_testpypi:  ## Publish the package to test.pypi.org.
 
 publish_to_pypi:  ## Publish the package to pypi.org.
 	# register account at https://pypi.org/account/register/
+	$(MAKE) lint
+	$(MAKE) test
 	$(MAKE) bump_version
 	${PYTHON} -m pip install --upgrade build twine
 	${PYTHON} -m build
