@@ -22,7 +22,7 @@ def test_load_games(mocker):
 def test__iter_games_from_play_by_play_file():
     play_by_play_file = testing_data.WAS_2022_TWO_GAME_EXAMPLE
 
-    games = list(load._iter_games_from_play_by_play_file(play_by_play_file))
+    games = list(load._get_games_from_play_by_play_file(play_by_play_file))
 
     game_one, game_two = games
     assert game_one.id.raw == "id,WAS202204070"

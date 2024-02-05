@@ -33,10 +33,9 @@ but can be overriden via the `data_dir` argument.
 ```python
 import pyretrosheet
 
-# generator for loading games in a given year
 games = pyretrosheet.load_games(year=2022)
 
-print(list(games)[0])
+print(games[0])
 """
 Game(
   id=GameID(home_team_id='SFN', date=datetime.date(2022, 4, 8), game_number=0, raw='id,SFN202204080'),
