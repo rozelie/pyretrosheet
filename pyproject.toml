@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "pyretrosheet"
-version = "0.0.6"
+version = "0.0.7"
 description = "Load, analyze, and enrich retrosheet.org MLB data."
 authors = [
   { name = "Ryan Ozelie", email = "ryan.ozelie@gmail.com" },
