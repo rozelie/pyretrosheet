@@ -44,6 +44,11 @@ class Player:
             if name in start_or_sub_line:
                 start_or_sub_line = start_or_sub_line.replace(name, new_name)
 
+        # Strange encoding error in 2008SFN.EVN
+        # Correct encoding in 2007SFN.EVN: 'sub,frank001,"Kevin Frandsen",1,2,6S'
+        if start_or_sub_line == 'sub,frank001,"Kevin Frank001",1,8,11':
+            start_or_sub_line = 'sub,frank001,"Kevin Frandsen",1,8,11'
+
         _, player_id, name, team_location, batting_order_position, fielding_position = start_or_sub_line.split(",")
         return cls(
             id=player_id,
