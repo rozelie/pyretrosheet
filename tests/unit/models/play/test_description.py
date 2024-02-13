@@ -141,6 +141,7 @@ def test__get_fielder_handlers():
     ["raw_description", "batter_event", "runner_event", "expected_fielder_errors"],
     [
         ("E1", BatterEvent.ERROR, None, {1: 1}),
+        ("3E1", BatterEvent.ERROR, None, {1: 1}),
         ("E12", BatterEvent.ERROR, None, {1: 1, 2: 1}),
         ("FLE1", BatterEvent.ERROR_ON_FOUL_FLY_BALL, None, {1: 1}),
         ("CS2(E2)", None, RunnerEvent.CAUGHT_STEALING, {2: 1}),

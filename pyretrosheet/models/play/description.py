@@ -323,9 +323,13 @@ def _get_fielder_errors(
     fielder_errors: defaultdict[int, int] = defaultdict(int)
     match batter_event:
         case BatterEvent.ERROR:
-            match = re.fullmatch(r"E(\d+)", description)
-            for fielder_position in match.group(1):  # type: ignore
-                fielder_errors[int(fielder_position)] += 1
+            if match := re.fullmatch(r"E(\d+)", description):
+                for fielder_position in match.group(1):
+                    fielder_errors[int(fielder_position)] += 1
+
+            if match := re.fullmatch(r"\dE(\d+)", description):
+                for fielder_position in match.group(1):
+                    fielder_errors[int(fielder_position)] += 1
 
         case BatterEvent.ERROR_ON_FOUL_FLY_BALL:
             match = re.fullmatch(r"FLE(\d+)", description)
