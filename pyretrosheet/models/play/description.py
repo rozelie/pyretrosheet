@@ -116,10 +116,11 @@ def _get_batter_event(description: str) -> BatterEvent | None:
         r"\d+\(B\)\d+\(.\)\d+\(.\)": BatterEvent.LINED_INTO_TRIPLE_PLAY,
         r"H(R)?": BatterEvent.HOME_RUN_LEAVING_PARK,
         r"H(R)?\d": BatterEvent.HOME_RUN_INSIDE_PARK,
-        r"S\d+": BatterEvent.SINGLE,
-        r"D\d+": BatterEvent.DOUBLE,
-        r"T\d+": BatterEvent.TRIPLE,
-        r"E\d": BatterEvent.ERROR,
+        # S, D, and T optionally include the fielder info
+        r"S(\d+)?": BatterEvent.SINGLE,
+        r"D(\d+)?": BatterEvent.DOUBLE,
+        r"T(\d+)?": BatterEvent.TRIPLE,
+        r"(\d)?E\d": BatterEvent.ERROR,
         r"FLE\d": BatterEvent.ERROR_ON_FOUL_FLY_BALL,
         r"FC\d": BatterEvent.FIELDERS_CHOICE,
         r"C": BatterEvent.CATCHER_INTERFERENCE,
@@ -238,8 +239,9 @@ def _get_fielding_handler_plays(
     fielding_handler_plays: list[str] = []
     match batter_event:
         case BatterEvent.SINGLE | BatterEvent.DOUBLE | BatterEvent.TRIPLE | BatterEvent.FIELDERS_CHOICE | BatterEvent.HOME_RUN_INSIDE_PARK:
-            match = re.fullmatch(r"(S|D|T|FC|H|HR)(\d+)", description)
-            fielding_handler_plays.append(match.group(2))  # type: ignore
+            # will not match in the case of fielder info not being present, e.g. description = "S"
+            if match := re.fullmatch(r"(S|D|T|FC|H|HR)(\d+)", description):
+                fielding_handler_plays.append(match.group(2))
 
     match runner_event:
         case RunnerEvent.CAUGHT_STEALING | RunnerEvent.PICKED_OFF | RunnerEvent.PICKED_OFF_CAUGHT_STEALING:
